@@ -1,0 +1,223 @@
+#+OPTIONS: p:t toc:nil
+
+* SICP Study, a collaborative classroom style learning
+
+This project is for peer reviewing the Structure and Interpretation
+of Computer Programs (SICP) assigments using this workflow:
+
+- Watch the lecture and read the book,
+- Submit assignments before Friday, and
+- Review others assignments on Friday.
+
+Bookmarks:
+
+- [[file:README.ics][iCalendar schedule]].
+- [[https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-001-structure-and-interpretation-of-computer-programs-spring-2005/index.htm][MIT courses]], [[http://archive.org/download/MIT_Structure_of_Computer_Programs_1986/][videos archive]].
+- [[https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html][The SICP book]], [[https://github.com/sarabander/sicp-epub/blob/master/sicp.epub?raw=true][epub version]].
+- [[https://github.com/TristanCacqueray/ensure-mit-scheme][ensure-mit-scheme]] Ansible installer.
+
+Do not edit this document directly, instead modify the README.org file
+and re-export the markdown and ics file.
+
+* Submit Assignment
+
+To submit an assignment, first create a folder with your name in the assignments
+directory and add your answers in text file(s). Any file format or directory
+structure will do. For example:
+
+- assignments/my-name/solution-1.txt
+- assignments/my-name/week1/1.2.scm
+
+Then submit a Pull request with the assignment name in the commit message.
+
+* Review Assignment
+
+Go to the [[https://github.com/sicp-study/sicp-2019/pulls][pull request list]] and pick another student assignment.
+Click the *Files Changed* button and check the answers.
+Feel free to add comment or ask for clarification by clicking the blue + sign.
+If the answers look correct to you, click the *Review changes* button and *Approve* the change.
+
+When one or more other studends already approved a change, then add a *mergeit* label to close
+the pull request.
+
+* 2019 Schedule
+:PROPERTIES:
+:CATEGORY: SICP
+:END:
+
+This is a weekly schedule adapted from this [[https://github.com/CompSciCabal/SMRTYPRTY/wiki/Reading-Schedule!-SICP-Mark-I][meetup]]:
+
+** Chapter 1
+*** 1.1 (The Elements of Programming)
+DEADLINE: <2019-01-11 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec1a.mp4][lecture]]
+
+For exercice 1.3, name the function square-sum-larger
+*** 1.2 (Procedures and the Processes Who Love Them)
+DEADLINE: <2019-01-18 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec1b.mp4][lecture]]
+
+*** 1.3 (Formulating Abstractions)
+DEADLINE: <2019-01-25 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2a.mp4][lecture]]
+
+** Chapter 2
+*** 1.3.4 & 2.1.1 & 2.1.2 & 2.1.3 (Data Abstraction)
+DEADLINE: <2019-02-01 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2b.mp4][lecture]]
+
+*** 2.1.4 (Interval Arithmetic)
+DEADLINE: <2019-02-08 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4][lecture]]
+
+*** 2.2.1 & 2.2.2 (Hierarchical Structures)
+DEADLINE: <2019-02-15 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4][lecture]]
+
+*** 2.2.3 (Sequences as Conventional Interfaces)
+DEADLINE: <2019-02-22 Fri>
+
+*** 2.2.4 (A Picture Language)
+DEADLINE: <2019-03-01 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4][lecture]]
+
+*** 2.3.1 & 2.3.2 (Symbolic Differentiation)
+DEADLINE: <2019-03-08 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4][lecture]]
+
+*** 2.3.3 (Representing Sets)
+DEADLINE: <2019-03-15 Fri>
+
+*** 2.3.4 (Huffman Encoding)
+DEADLINE: <2019-03-22 Fri>
+
+*** 2.4 (Data Representations)
+DEADLINE: <2019-03-29 Fri>
+
+*** 2.5.1 & 2.5.2 (Generic Operations)
+DEADLINE: <2019-04-05 Fri>
+
+*** 2.5.3 (Symbolic Algebra)
+DEADLINE: <2019-04-12 Fri>
+
+** Chapter 3
+*** 3.1 (Local State)
+DEADLINE: <2019-04-19 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec5a.mp4][lecture]]
+
+*** 3.2 (The Environmental Model)
+DEADLINE: <2019-04-26 Fri>
+
+*** 3.3.1 & 3.3.2 (Mutable Lists and Queues)
+DEADLINE: <2019-05-03 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec5b.mp4][lecture]]
+
+*** 3.3.3 & 3.3.4 (Mutable Tables and Circuit Simulation)
+DEADLINE: <2019-05-10 Fri>
+
+*** 3.3.5 (Propagation of Constraints)
+DEADLINE: <2019-05-17 Fri>
+
+*** 3.4 (Concurrency)
+DEADLINE: <2019-05-24 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec6a.mp4][lecture]]
+
+*** 3.5.1 & 3.5.2 (Infinite Streams)
+DEADLINE: <2019-05-31 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/Lec6b.mp4][lecture]]
+
+*** 3.5.3 (Exploiting the Stream Paradigm)
+DEADLINE: <2019-06-07 Fri>
+
+*** 3.5.4 & 3.5.5 (Streams and Delayed Evaluation)
+DEADLINE: <2019-06-14 Fri>
+
+** Chapter 4
+*** 4.1.1 & 4.1.2 (Metacircular Doohickeys)
+DEADLINE: <2019-06-21 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec7a.mp4][lecture]]
+
+*** 4.1.3 & 4.1.4 & 4.1.5 & 4.1.6 & 4.1.7 (Evaluators are Programs Too)
+DEADLINE: <2019-06-28 Fri>
+
+*** 4.1.3 & 4.1.4 & 4.1.5 & 4.1.6 & 4.1.7 (Evaluators are Programs Too)
+DEADLINE: <2019-07-05 Fri>
+
+*** 4.2.1 & 4.2.2 (Lazy Evaluators Need Motivation)
+DEADLINE: <2019-07-12 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec7b.mp4][lecture]]
+
+*** 4.2.3 (Lazy Streams Wend Cross Dales)
+DEADLINE: <2019-07-19 Fri>
+
+*** 4.3.1, first half of 4.3.2 (Non-deterministic Computing Exclamation Point)
+DEADLINE: <2019-07-26 Fri>
+
+*** remainder of 4.3 (Implementing Amb)
+DEADLINE: <2019-08-02 Fri>
+
+*** 4.4.1 (Deductive Information Retrieval)
+DEADLINE: <2019-08-09 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec8a.mp4][lecture]]
+
+*** 4.4.2, 4.4.3
+DEADLINE: <2019-08-16 Fri>
+
+*** 4.4.2, 4.4.3
+DEADLINE: <2019-08-23 Fri>
+
+*** Week off!
+*** 4.4.4.1&2
+DEADLINE: <2019-09-06 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec8b.mp4][lecture]]
+
+*** 4.4.4.3&4
+DEADLINE: <2019-09-13 Fri>
+
+** Chapter 5
+*** 5.1
+DEADLINE: <2019-09-20 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec9a.mp4][lecture]]
+
+*** 5.1.1-5.1.2
+DEADLINE: <2019-09-27 Fri>
+
+*** 5.1.3-5.1.5
+DEADLINE: <2019-10-04 Fri>
+
+*** 5.2.1
+DEADLINE: <2019-10-11 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec9b.mp4][lecture]]
+
+*** 5.2.2
+DEADLINE: <2019-10-18 Fri>
+
+*** 5.2.3-5.2.4
+DEADLINE: <2019-10-25 Fri>
+
+*** 5.3
+DEADLINE: <2019-11-01 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/Lec10a.mp4][lecture]]
+
+*** 5.4.1 & 5.4.2
+DEADLINE: <2019-11-08 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec10b.mp4][lecture]]
+
+*** 5.4.3 & 5.4.4
+DEADLINE: <2019-11-15 Fri>
+
+*** 5.5.1 & 5.5.2
+DEADLINE: <2019-11-22 Fri>
+
+*** 5.5.3 & 5.5.4
+DEADLINE: <2019-11-29 Fri>
+
+*** 5.5.5 & 5.5.6
+DEADLINE: <2019-12-06 Fri>
+
+** Ending
+*** SICP The Final Chapter! (SICP The End)
+SCHEDULED: <2019-12-13 Fri>
+
+*** SICP REVIEW PARTY!!! (SICP Review Party!)
+SCHEDULED: <2019-12-20 Fri>
