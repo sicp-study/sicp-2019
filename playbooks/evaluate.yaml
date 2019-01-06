@@ -1,0 +1,34 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Get modified file list
+      shell: "git diff HEAD^ HEAD --name-status | awk '/^[AM]/ { print $2 }'"
+      register: _assignment_files
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: Untangle org file
+      command:  >-
+        emacs --batch
+          -l org {{ item }}
+          --eval "(require 'org)"
+          --eval '(org-babel-tangle "{{ item }}")'
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+      with_items: "{{ _assignment_files.stdout_lines }}"
+      when: item.endswith('.org')
+
+    - name: Get new file list
+      shell: "git status -u --porcelain -s | awk '/^\\?\\?/ { print $2 }'"
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+      register: _new_files
+
+    - name: Run evaluation script
+      command: >-
+        timeout 5s python evaluate/cmd.py {{ item }}
+      when: "item != ''"
+      with_items: "{{ _assignment_files.stdout_lines }} + {{ _new_files.stdout_lines }}"
+      args:
+        chdir: "{{ zuul.project.src_dir }}"

@@ -1,0 +1,28 @@
+---
+- hosts: all
+  gather_facts: no
+  vars:
+    assignments_dir: "{{ zuul.project.src_dir }}/assignments/"
+  tasks:
+    - name: Look for org files
+      command: "find {{ assignments_dir }} -type f -name '*.org'"
+      register: _org_files
+
+    - name: Untangle org files
+      command:  >-
+        emacs --batch
+          -l org {{ item }}
+          --eval "(require 'org)"
+          --eval '(org-babel-tangle "{{ item }}")'
+      with_items: "{{ _org_files.stdout_lines }}"
+
+    - name: Look for scm files
+      command: "find {{ assignments_dir }} -type f -name '*.scm'"
+      register: _scm_files
+
+    - name: Run evaluation script
+      command: >-
+        timeout 5s python evaluate/cmd.py --debug {{ item }}
+      with_items: "{{ _scm_files.stdout_lines }}"
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
