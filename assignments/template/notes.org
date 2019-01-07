@@ -1,0 +1,17 @@
+#+TITLE: SICP X assignment
+#+AUTHOR: Template User
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Chapter Name
+** Section Name
+*** Exercise X.Y
+Exercise notes...
+#+BEGIN_SRC scheme :tangle X.Y.scm
+(/ 4 2)
+#+END_SRC
+
+*** Exercise X.Z
+#+BEGIN_SRC scheme :tangle X.Z.scm
+(define (square x) (* x x))
+#+END_SRC
