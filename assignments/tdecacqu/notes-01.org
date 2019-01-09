@@ -1,0 +1,101 @@
+#+TITLE: SICP 1.1 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* The Elements of Programming
+** Conditional Expressions and Predicates
+
+- *Normal order evaluation* fully expand then reduce
+- *Applicative order* eval then apply
+
+*** Exercise 1.1
+#+BEGIN_SRC scheme :tangle 1.1.scm
+10
+12
+8
+3
+6
+19
+#t
+4
+16
+6
+16
+#+END_SRC
+
+*** Exercise 1.2
+Having the operator on the left and operand on the right may be better to write long expression :)
+#+BEGIN_SRC scheme :tangle 1.2.scm
+(/ (+ 5 4 (- 2 (- 3 (+ 6 (/ 4 5)))))
+   (* 3 (- 6 2)(- 2 7)))
+#+END_SRC
+
+*** Exercise 1.3
+Without list, we can just compare to pick one of the 3 possible outcomes.
+#+BEGIN_SRC scheme :tangle 1.3.scm
+(define (square x) (* x x))
+(define (square-sum x y) (+ (square x) (square y)))
+(define (square-sum-larger a b c)
+  (cond
+   ((and (> a c) (> b c)) (square-sum a b))
+   ((and (> a b) (> c b)) (square-sum a c))
+   (else (square-sum b c))))
+#+END_SRC
+
+*** Exercise 1.4
+The (if (> b 0) + -) returns the operator *+* if b is positive, *-* if b is negative.
+Then the (if) expression result is used as the operator, resulting in a-plus-abs-b doing a+abs(b).
+
+*** Exercise 1.5
+Ben will observe an infinite loop, because evaluating (test 0 (p)) with applicative order means that (p) gets evaluated infinitely.
+If the interpreter was doing normal order evaluation, then (p) won't be evaluated because the test will return before.
+
+*** Exercise 1.6
+The *if* operator is special because it doesn't do applicative order and will return early. For example, in
+the exercise 1.5, doing (if (#t) 0 (p)) doesn't result in an infinite loop.
+
+The new-if operator will do applicative order resulting in Alyssa's attempt to trigger an infinit loop.
+Another example would be that "(new-if #t 42 (/ 1 0))" fails because the division cause an exception.
+However "(if #t 42 (/ 1 0))" works because *if* doesn't do applicative order
+
+*** Exercise 1.7
+The problem with small numbers is because the goodenough tolerance is absolute, so small number results may fall
+under the threshold.
+The problem with big numbers is that floating point exponent limit the precision of small increment.
+It seems like mit-scheme is using *float-width* 64 bits (long), and according to
+https://en.wikipedia.org/wiki/Floating-point_arithmetic#Internal_representation
+the significant field is 52 bits long. That means 2**53 + 1 == 2**53.
+
+#+BEGIN_SRC scheme :tangle 1.7.scm
+(define (average x y) (/ (+ x y) 2))
+(define (improve guess x) (average guess (/ x guess)))
+(define (goodenough? guess old-guess x)
+  (<= (abs (- old-guess guess)) (* guess .001)))
+(define (sqrt-iter guess old-guess x)
+  (if (goodenough? guess old-guess x)
+      guess
+      (sqrt-iter (improve guess x) guess x)))
+(define (sqrt x) (sqrt-iter 1.0 2.0 x))
+#+END_SRC
+The new method works better for small number as the threshold is now relative.
+It also prevent infinit loop for big numbers as the relative threshold makes the goodenough? before
+(improve ) returns its given parameters.
+
+*** Exercise 1.8
+Same code as 1.7, but with a different improve method.
+#+BEGIN_SRC scheme :tangle 1.8.scm
+(define (improve guess x)
+  (/ (+ (/ x (square guess)) (* guess 2))
+     3))
+
+;; This code is similar to 1.8
+(define (square x) (* x x))
+(define (goodenough? guess old-guess x)
+  (<= (abs (- old-guess guess)) (* guess .001)))
+(define (cube-root-iter guess old-guess x)
+  (if (goodenough? guess old-guess x)
+      guess
+      (cube-root-iter (improve guess x) guess x)))
+(define (cube-root x) (cube-root-iter 1.0 2.0 x))
+#+END_SRC
