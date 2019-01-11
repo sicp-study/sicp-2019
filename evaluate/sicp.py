@@ -22,7 +22,7 @@ from scheme import EvaluateScheme
 
 class EvaluateSICP(EvaluateScheme):
     def eval_1_1(self, fpath):
-        expect = ["10", "12", "8", "3", "6", "19", "#t", "4", "16", "6", "16"]
+        expect = ["10", "12", "8", "3", "6", "19", "#f", "4", "16", "6", "16"]
         errors = []
         for statement, result in zip(self.iter_statements(fpath), expect):
             if statement != result:
