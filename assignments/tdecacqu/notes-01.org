@@ -17,7 +17,7 @@
 3
 6
 19
-#t
+#f
 4
 16
 6
@@ -70,10 +70,10 @@ the significant field is 52 bits long. That means 2**53 + 1 == 2**53.
 #+BEGIN_SRC scheme :tangle 1.7.scm
 (define (average x y) (/ (+ x y) 2))
 (define (improve guess x) (average guess (/ x guess)))
-(define (goodenough? guess old-guess x)
+(define (goodenough? guess old-guess)
   (<= (abs (- old-guess guess)) (* guess .001)))
 (define (sqrt-iter guess old-guess x)
-  (if (goodenough? guess old-guess x)
+  (if (goodenough? guess old-guess)
       guess
       (sqrt-iter (improve guess x) guess x)))
 (define (sqrt x) (sqrt-iter 1.0 2.0 x))
@@ -91,10 +91,10 @@ Same code as 1.7, but with a different improve method.
 
 ;; This code is similar to 1.8
 (define (square x) (* x x))
-(define (goodenough? guess old-guess x)
+(define (goodenough? guess old-guess)
   (<= (abs (- old-guess guess)) (* guess .001)))
 (define (cube-root-iter guess old-guess x)
-  (if (goodenough? guess old-guess x)
+  (if (goodenough? guess old-guess)
       guess
       (cube-root-iter (improve guess x) guess x)))
 (define (cube-root x) (cube-root-iter 1.0 2.0 x))
