@@ -1,0 +1,1 @@
+In the code snippet: ((if (> b 0) + -) a b), if the input argument operand b is positve then the operator "+" is the result of the compound expression. This operand is then applied to a and b to give a + b. If b was negative then the operator "-" is applied to a and b to give a - b. The whole procedure a-plus-abs-b behaves like a + abs(b) .

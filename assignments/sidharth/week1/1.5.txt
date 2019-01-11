@@ -1,0 +1,2 @@
+In the case of applicative - order evaluation of (test 0 (p)), results in the expression (p) being evaluated in an infinite loop since (p) is defined to have the value (p). 
+In the case of normal - order evaluation , (test 0 (p)) is first evaluated as ( if (= 0 0) 0 (p)) which is evaluated as 0.

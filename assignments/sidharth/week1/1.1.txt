@@ -1,0 +1,13 @@
+;Value: 10
+;Value: 12
+;Value: 8
+;Value: 3
+;Value: 6
+;Unspecified return value
+;Unspecified return value
+;Value: 19
+;Value: #f
+;Value: 4
+;Value: 16
+;Value: 6
+;Value: 16
