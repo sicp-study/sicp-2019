@@ -1,0 +1,167 @@
+#+TITLE: SICP 1.1 assignment
+#+AUTHOR: Patrick Dillon
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Chapter Name
+** Section Name
+*** Exercise 1.1
+**** Question
+10
+(+ 5 3 4)
+(- 9 1)
+(/ 6 2)
+(+ (* 2 4) (- 4 6))
+(define a 3)
+(define b (+ a 1))
+(+ a b (* a b))
+(= a b)
+(if (and (> b a) (< b (* a b)))
+    b
+    a)
+(cond ((= a 4) 6)
+      ((= b 4) (+ 6 7 a))
+      (else 25))
+(+ 2 (if (> b a) b a))
+(* (cond ((> a b) a)
+         ((< a b) b)
+         (else -1))
+   (+ a 1))
+**** My Answer
+10
+12
+8
+3
+6
+void
+void
+19
+false (#f)
+4
+16
+6
+16
+
+#+BEGIN_SRC scheme :tangle 1.1.scm
+10
+(+ 5 3 4)
+(- 9 1)
+(/ 6 2)
+(+ (* 2 4) (- 4 6))
+(define a 3)
+(define b (+ a 1))
+(+ a b (* a b))
+(= a b)
+(if (and (> b a) (< b (* a b)))
+    b
+    a)
+(cond ((= a 4) 6)
+      ((= b 4) (+ 6 7 a))
+      (else 25))
+(+ 2 (if (> b a) b a))
+(* (cond ((> a b) a)
+         ((< a b) b)
+         (else -1))
+   (+ a 1))
+#+END_SRC
+
+*** Exercise 1.2
+#+BEGIN_SRC scheme :tangle 1.2.scm
+( / (+ 5 4 (- 2 
+              (- 3 
+                 (+ 6 
+                    (/ 4 5)))))
+    (* 3 
+       (- 6 2) 
+       (- 2 7)))
+#+END_SRC
+
+#+RESULTS:
+: -37/150
+
+*** Exercise 1.3
+#+BEGIN_SRC scheme :tangle 1.3.scm
+(define (sum-larger-squares x y z)
+  (+ (if (> x y) 
+          (* x x)
+          (* y y))
+     (if (> x z)
+          (* x x)
+          (* z z))))
+(sum-larger-squares 1 2 3)
+#+END_SRC
+
+#+RESULTS:
+: 13
+
+*** Exercise 1.4
+The function will add a to the absolute value of b by using addition if b is greater than 0 and subtraction othwerwise.
+
+*** Exercise 1.5
+With applicative-order, operands are only expanded as needed so the procedure would evaluate to return 0. With normal order, the value for p would be evaluated, which would cause a self-referential loop.
+
+*** Exercise 1.6
+The body of Alyssa's procedure is ok, but when arguments are passed to her function they will be evaluated in applicative order. When sqrt-iter is called, the interpreter will see sqrt-iter passed as an argument and try to evaluate its value, thus entering an infinite loop.
+
+*** Exercise 1.7
+The problem with this method when evaluating small numbers is that the hard-coded difference limits the amount of precision you can obtain. For example if you were trying to obtain the square root of 0.000016 and provided a guess of 0.02, the procedure would return without iteratively refining and provide an answer of 0.02.
+
+The problem with evaluating large numbers with this method is that when using floating-point precision your decimal precision decreases as your significand grows. 
+
+#+BEGIN_SRC scheme :tangle 1.7.scm
+
+(define (improve guess x)
+  (average guess (/ x guess)))
+
+(define (average x y)
+  (/ (+ x y) 2))
+
+(define (good-enough? guess prev)
+  (< (abs (- guess prev)) 0.001))
+
+(define (sqrt-iter guess x prev)
+  (if (good-enough? guess prev)
+      guess
+      (sqrt-iter (improve guess x)
+                 x
+                 guess)))
+
+(define (sqrt x)
+  (sqrt-iter 1.0 x 0))
+
+(sqrt 4)
+#+END_SRC
+
+#+RESULTS:
+: 2.0000000929222947
+
+*** Exercise 1.8
+#+BEGIN_SRC scheme :tangle 1.8.scm
+(define (improve y x)
+  (/ (+ (/ x
+           (* y y))
+        (* 2 y))
+     3))
+
+(define (average x y)
+  (/ (+ x y) 2))
+
+(define (good-enough? guess prev)
+  (< (abs (- guess prev)) 0.001))
+
+(define (cube-root-iter guess x prev)
+  (if (good-enough? guess prev)
+      guess
+      (cube-root-iter (improve guess x)
+                 x
+                 guess)))
+
+(define (cube-root x)
+  (cube-root-iter 1.0 x 0))
+
+(cube-root 9)
+#+END_SRC
+
+#+RESULTS:
+: 2.0800838232385224
+
