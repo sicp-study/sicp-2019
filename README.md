@@ -23,7 +23,7 @@ To submit an assignment, first create a folder with your name in the assignments
 -   assignments/my-name/solution-1.txt
 -   assignments/my-name/week1/1.2.scm
 
-Note that if the file name matches an exercise number, then an evaluation script will be used to validate the code (wip). Org-mode tangle are also supported, feel free to use the [template](assignments/template/notes.md).
+Note that if the file name matches an exercise number, then an evaluation script will be used to validate the code (wip). Org-mode tangle are also supported, feel free to use the [template](assignments/template/notes.org).
 
 Then submit a Pull request with the assignment name in the commit message.
 

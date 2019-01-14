@@ -52,7 +52,7 @@ the pull request.
 This is a weekly schedule adapted from this [[https://github.com/CompSciCabal/SMRTYPRTY/wiki/Reading-Schedule!-SICP-Mark-I][meetup]]:
 
 ** Chapter 1
-*** 1.1 (The Elements of Programming)
+*** DONE 1.1 (The Elements of Programming)
 DEADLINE: <2019-01-11 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec1a.mp4][lecture]]
 
@@ -60,10 +60,13 @@ DEADLINE: <2019-01-11 Fri>
 - For exercise 1.7, name the function sqrt
 - For exercise 1.8, name the function cube-root
 
-*** 1.2 (Procedures and the Processes Who Love Them)
+*** 1.2 (Procedures and the Processes They Generate)
 DEADLINE: <2019-01-18 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec1b.mp4][lecture]]
 
+- For exercise 1.11, name the procedure f-recursive and f-iterative
+- For exercise 1.12, name the procedure pascal
+- For exercise 1.18, name the procedure mult-iterative
 *** 1.3 (Formulating Abstractions)
 DEADLINE: <2019-01-25 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2a.mp4][lecture]]
