@@ -17,8 +17,10 @@
       with_items: "{{ _org_files.stdout_lines }}"
 
     - name: Look for scm files
-      command: "find {{ assignments_dir }} -type f -name '*.scm'"
+      command: "find assignments/ -type f -name '*.scm'"
       register: _scm_files
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
 
     - name: Run evaluation script
       command: >-
