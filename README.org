@@ -65,8 +65,11 @@ DEADLINE: <2019-01-18 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec1b.mp4][lecture]]
 
 - For exercise 1.11, name the procedure f-recursive and f-iterative
-- For exercise 1.12, name the procedure pascal
-- For exercise 1.18, name the procedure mult-iterative
+- For exercise 1.12, name the procedure (pascal row col), with row and col starting at 1.
+                     The procedure should return -1 for invalid operands.
+- For exercise 1.16, name the procedure (fast-expt-iterative b n)
+- For exercise 1.17, name the procedure (fast-mult a b)
+- For exercise 1.18, name the procedure (fast-mult-iterative a b)
 *** 1.3 (Formulating Abstractions)
 DEADLINE: <2019-01-25 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2a.mp4][lecture]]

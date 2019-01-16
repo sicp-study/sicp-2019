@@ -44,7 +44,7 @@ def main():
                 raise
         finally:
             evaluate.close()
-        print("%s: %s" % (fpath, result))
+        print("%s: %s\n" % (fpath, result))
     if not success:
         exit(1)
 

@@ -43,7 +43,7 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 ## Chapter 1
 
 
-### 1.1 (The Elements of Programming)
+### DONE 1.1 (The Elements of Programming)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-01-11 Fri&gt;</span></span></p>
 
@@ -54,11 +54,17 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 -   For exercise 1.8, name the function cube-root
 
 
-### 1.2 (Procedures and the Processes Who Love Them)
+### 1.2 (Procedures and the Processes They Generate)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-01-18 Fri&gt;</span></span></p>
 
 [lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec1b.mp4)
+
+-   For exercise 1.11, name the procedure f-recursive and f-iterative
+-   For exercise 1.12, name the procedure (pascal row col), with row and col starting at 1. The procedure should return -1 for invalid operands.
+-   For exercise 1.16, name the procedure (fast-expt-iterative b n)
+-   For exercise 1.17, name the procedure (fast-mult a b)
+-   For exercise 1.18, name the procedure (fast-mult-iterative a b)
 
 
 ### 1.3 (Formulating Abstractions)
