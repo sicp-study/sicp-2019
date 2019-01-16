@@ -38,4 +38,20 @@ Normal-order:
 => Value of Compound Procedure P
 
 
-*** Exercise 1.6
+*** Exercise 1.7
+(define (try prev-guess guess x)
+         (if (is-good-enough prev-guess guess)
+            guess
+            (try guess (improve guess) x)
+         ))
+         
+(define (is-good-enough prev-guess guess) 
+        ((< (- guess prev-guess) 0.1 )))
+
+(define (improve guess x) 
+        ((/ (+ guess (/ x guess)) 2)))
+        
+(define (square-root x)
+    (try 0 1 x))
+
+*** Exercise 1.8
