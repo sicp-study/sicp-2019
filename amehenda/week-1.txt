@@ -26,7 +26,18 @@ false
             (+ (* x x) (* y y))
             (+ (* y y) (* z z))
             )))
-            
+
+*** Exercise 1.4            
+
+Let the values passed to (a-plus-abs-b a b) be 1, 2
+Such that the call is made as: (a-plus-abs-b 1 2)
+Then, the evaluation will happen as faollowing:
+=> ((if (> 2 0) + -) 1 2)
+=> (+ 1 2)
+=> 3
+
+
+
 *** Exercise 1.5
 
 Applicative-order: Infinite loop as the interpreter tries to define (p) as itself.
@@ -36,6 +47,8 @@ Normal-order:
 => (p)
 => p
 => Value of Compound Procedure P
+
+*** Exercise 1.6
 
 
 *** Exercise 1.7
@@ -55,3 +68,17 @@ Normal-order:
     (try 0 1 x))
 
 *** Exercise 1.8
+(define (try guess x)
+        (if (is-good-enough guess x)
+        guess
+        (try (improve guess x) x)))
+
+(define (is-good-enough guess x)
+        (< (abs (- (* guess guess guess) x)) 0.00000001))
+
+(define (improve guess x)
+        (/ (+ (/ x (* guess guess))(* 2.0 guess)) 3.0))
+
+        
+(define (newton-cube-root x)
+        (try 1.0 x))
