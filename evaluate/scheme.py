@@ -112,6 +112,13 @@ class EvaluateScheme:
             raise RuntimeError(result)
         return "SUCCESS"
 
+    def load(self, fpath):
+        """Load the content of fpath"""
+        if not self.scheme:
+            self.open()
+        for statement in self.iter_statements(fpath):
+            self.eval(statement)
+
     def eval(self, statement):
         """Send statement to mit-scheme, except a new line output"""
         if not self.scheme:
