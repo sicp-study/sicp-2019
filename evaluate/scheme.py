@@ -64,8 +64,11 @@ class EvaluateScheme:
 
     def iter_statements(self, fpath):
         """Yield sexp in the file content"""
-        with open(fpath) as obj:
-            content = obj.read()
+        if os.path.exists(fpath):
+            with open(fpath) as obj:
+                content = obj.read()
+        else:
+            content = fpath.strip()
         if not content.endswith('\n'):
             content += '\n'
         # Remove comments
@@ -126,7 +129,7 @@ class EvaluateScheme:
         if not statement.endswith('\n'):
             statement += '\n'
         self.log.debug("-> Sending to mit-scheme [%s]", statement[:-1])
-        self.scheme.stdin.write(statement)
+        self.scheme.stdin.write(statement.encode('ascii'))
         r = ""
         while not r:
             r = self.scheme.stdout.readline().strip()
@@ -135,3 +138,15 @@ class EvaluateScheme:
         result = self.scheme.stdout.readline().strip()
         self.log.debug("Received [%s]", result)
         return result
+
+    def eval_value(self, statement, vtype):
+        ret = self.eval(statement).split()
+        if ret[0] != ";Value:":
+            raise RuntimeError(
+                "%s should have returned a value instead of [%s]" % (
+                    statement, " ".join(ret)))
+        try:
+            return vtype(ret[1])
+        except ValueError:
+            raise RuntimeError("%s should have returned a %s (was %s)" % (
+                statement, vtype, ret[1]))
