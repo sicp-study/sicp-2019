@@ -54,7 +54,7 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 -   For exercise 1.8, name the function cube-root
 
 
-### 1.2 (Procedures and the Processes They Generate)
+### DONE 1.2 (Procedures and the Processes They Generate)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-01-18 Fri&gt;</span></span></p>
 
@@ -67,11 +67,20 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 -   For exercise 1.18, name the procedure (fast-mult-iterative a b)
 
 
-### 1.3 (Formulating Abstractions)
+### 1.3 (Formulating Abstractions with Higher-Order Procedures)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-01-25 Fri&gt;</span></span></p>
 
 [lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2a.mp4)
+
+-   For exercise 1.29, name the procedure simpson-integral
+-   For exercise 1.31, name the recursive product: product-recursive, the iterative produce: product, the factorial: (factorial n), and (john-wallis-pi n) the pi approximationg using n terms (the example is n=6).
+-   For exercise 1.32, name the recursive accumulate: accumulate-recursive, the iterative accumulate: accumulate.
+-   For exercise 1.33, name the procedures (sum-square-prime a b) and (sum-coprime n).
+-   For exercise 1.37, name the procedures count-fract-recursive and count-fract.
+-   For exercise 1.38, name the D procedures (euler-sequence k) and the number (euler-number k).
+-   For exercise 1.44, name the procedure (nfold-smooth f n)
+-   For exercise 1.45, name the procedure (nroot n x)
 
 
 ## Chapter 2

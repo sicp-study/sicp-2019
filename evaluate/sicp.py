@@ -209,3 +209,334 @@ class EvaluateSICP(EvaluateScheme):
                     ret[1], f
                 ))
         return ", ".join(errors)
+
+    common_1_3 = """
+(define (inc x) (+ x 1))
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+(define (cube x) (* x x x))
+(define (even? n) (= (remainder n 2) 0))
+(define (identity x) x)
+(define (smallest-divisor n)
+  (define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+          ((divides? test-divisor n) test-divisor)
+          (else (find-divisor n (+ test-divisor 1)))))
+  (define (divides? a b)
+    (= (remainder b a) 0))
+  (find-divisor n 2))
+(define (prime? n)
+  (= n (smallest-divisor n)))
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+(define dx 0.00001)
+(define (average a b) (/ (+ a b) 2))
+    """
+
+    def eval_1_29(self, fpath):
+        # Load provided code
+        self.load(self.common_1_3)
+        self.load(fpath)
+
+        errors = []
+        for n, expected in ((100, 0.2499), (1000, 0.25)):
+            f = "(simpson-integral cube 0 1.0 %d)" % n
+            ret = self.eval(f).split()
+            if ret[0] != ";Value:":
+                return "%s should have returned a value instead of %s" % (
+                    f, " ".join(ret))
+            if abs(float(ret[1]) - n) < 0.001:
+                errors.append("%s is not the correct answer for %s" % (
+                    ret[1], f))
+        return ", ".join(errors)
+
+    def eval_1_30(self, fpath):
+        self.load(fpath)
+        errors = []
+        f = "(sum (lambda (x) x) 1 1+ 10)"
+        ret = self.eval_value(f, int)
+        if ret != 55:
+            errors.append("%s is not the correct answer for %s" % (
+                ret, f))
+        return ", ".join(errors)
+
+    def eval_1_31(self, fpath):
+        self.load(self.common_1_3)
+        self.load(fpath)
+        errors = []
+        for p in ("product", "product-recursive"):
+            f = "(%s identity 1 1+ 5)" % p
+            try:
+                ret = self.eval_value(f, int)
+                if ret != 120:
+                    errors.append("%s is not the correct answer for %s" % (
+                        ret, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+
+        for n in (0, 1, 5, 10):
+            f = "(factorial %d)" % n
+            try:
+                ret = self.eval_value(f, int)
+                if ret != math.factorial(n):
+                    errors.append("%s is not the correct answer for %s" % (
+                        ret, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+
+        for n, expected in ((6, 3.3), (12, 3.2), (32, 3.1)):
+            f = "(john-wallis-pi %d)" % n
+            try:
+                ret = self.eval_value(f, float)
+                if abs(ret - expected) > 0.1:
+                    errors.append("%s is not the correct answer for %s" % (
+                        ret, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_32(self, fpath):
+        self.load(fpath)
+        errors = []
+        for p in ("accumulate", "accumulate-recursive"):
+            for op in ("+", "*"):
+                if op == "+":
+                    nv = 0
+                    res = 15
+                else:
+                    nv = 1
+                    res = 120
+                f = "(%s %s %s (lambda (x) x) 1 1+ 5)" % (p, op, nv)
+                try:
+                    ret = self.eval_value(f, int)
+                    if ret != res:
+                        errors.append("%s is not the correct answer for %s" % (
+                            ret, f))
+                except RuntimeError as e:
+                    errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_33(self, fpath):
+        self.load(self.common_1_3)
+        self.load(fpath)
+        errors = []
+        for f, expected in (("(sum-square-prime 1 10)", 88),
+                            ("(sum-coprime 10)", 20)):
+            try:
+                ret = self.eval_value(f, int)
+                if ret != expected:
+                    errors.append("%s is not the correct answer for %s" % (
+                        ret, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_37(self, fpath):
+        self.load(fpath)
+        errors = []
+        for o in ("cont-frac-recursive", "cont-frac"):
+            f = "(%s (lambda (i) 1.0) (lambda (i) 1.0) 10)" % o
+            try:
+                ret = self.eval_value(f, float)
+                if (abs(ret - 1 / ((math.sqrt(5) + 1) / 2)) > 0.001):
+                    errors.append("%s is not the correct answer for %s" % (
+                        ret, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    cont_frac = """
+(define (cont-frac n d k)
+  (define (iter x result)
+    (if (= x 0)
+        result
+        (iter (- x 1) (/ (n x)
+                         (+ (d x) result)))))
+  (iter k 0))
+"""
+
+    def eval_1_38(self, fpath):
+        self.load(self.cont_frac)
+        self.load(fpath)
+        errors = []
+        idx = 1
+        for n in (1, 2, 1, 1, 4, 1, 1, 6, 1, 1, 8):
+            f = "(euler-sequence %d)" % idx
+            idx += 1
+            try:
+                ret = int(self.eval_value(f, float))
+                if ret != n:
+                    errors.append("%s is not the correct answer for %s" % (
+                        ret, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        f = "(euler-number 20)"
+        ret = self.eval_value(f, float)
+        if (abs(ret - (math.e - 2)) > 0.001):
+            errors.append("%s is not the correct answer for %s" % (ret, f))
+        return ", ".join(errors)
+
+    def eval_1_39(self, fpath):
+        self.load(self.common_1_3)
+        self.load(self.cont_frac)
+        self.load(fpath)
+        errors = []
+        for rad in (0, 1, 2, 10, -5, 0.5):
+            f = "(tan-cf %f 20)" % rad
+            try:
+                ret = self.eval_value(f, float)
+                if abs(ret - math.tan(rad)) > 0.001:
+                    errors.append("%s is not the correct answer for %s" % (
+                        ret, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    newton_method = """
+(define tolerance 0.00001)
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+          next
+          (try next))))
+  (try first-guess))
+
+(define dx 0.00001)
+(define (deriv g)
+  (lambda (x)
+    (/ (- (g (+ x dx)) (g x))
+       dx)))
+(define (newton-transform g)
+  (lambda (x)
+    (- x (/ (g x) ((deriv g) x)))))
+
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+"""
+
+    def eval_1_40(self, fpath):
+        self.load(self.common_1_3)
+        self.load(self.newton_method)
+        self.load(fpath)
+        errors = []
+        for a, b, c in ((0, 0, 0), (0, 0, 1), (1, 2, 3), (4, 5, 1)):
+            f = "(newtons-method (cubic %f %f %f) 1)" % (a, b, c)
+            try:
+                x = self.eval_value(f, float)
+                fp = x**3 + a * x ** 2 + b * x + c
+                if fp > 0.001:
+                    errors.append("%s is not the correct answer for %s" % (
+                        x, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_41(self, fpath):
+        self.load(self.common_1_3)
+        self.load(fpath)
+        errors = []
+        for f, res in (("((double square) 2)", 16),
+                       ("(((double (double double)) inc) 5)", 21)):
+            try:
+                r = self.eval_value(f, int)
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_42(self, fpath):
+        self.load(self.common_1_3)
+        self.load(fpath)
+        errors = []
+        for f, res in (("((compose square inc) 6)", 49),
+                       ("((compose cube square) 42)", 5489031744)):
+            try:
+                r = self.eval_value(f, int)
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_43(self, fpath):
+        self.load(self.common_1_3)
+        self.load("(define (compose f g) (lambda (x) (f (g x))))")
+        self.load(fpath)
+        errors = []
+        for f, res in (("((repeated square 2) 5)", 625),
+                       ("((repeated inc 16) 5)", 21)):
+            try:
+                r = self.eval_value(f, int)
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    repeated = """
+(define (compose f g) (lambda (x) (f (g x))))
+(define (repeated f n)
+              (if (= n 1)
+                  (lambda (x) (f x))
+                  (compose f (repeated f (- n 1)))))
+    """
+
+    def eval_1_44(self, fpath):
+        self.load(self.common_1_3)
+        self.load(self.repeated)
+        self.load(fpath)
+        errors = []
+        for f, res in (("((smooth square) 5)", 25),
+                       ("((nfold-smooth square 5) 5)", 25)):
+            try:
+                r = round(self.eval_value(f, float))
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_45(self, fpath):
+        self.load(self.common_1_3)
+        self.load(self.newton_method)
+        self.load(self.repeated)
+        self.load(fpath)
+        errors = []
+        for n in range(1, 10):
+            f = "(nroot %d 42)" % n
+            try:
+                r = self.eval_value(f, float)
+                if abs(r - 42 ** (1./n)) > 0.01:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_1_46(self, fpath):
+        self.load(self.common_1_3)
+        self.load(fpath)
+        errors = []
+        for f, res in (("(sqrt 26)", 5),
+                       ("(fixed-point (lambda (x) x) 10)", 10)):
+            try:
+                r = round(self.eval_value(f, float))
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
