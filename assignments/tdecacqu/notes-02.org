@@ -313,7 +313,7 @@ q' = pq + q^2 + qp
 This feels like magic :)
 
 *** Exercise 1.20
-Compare gcd execution with normal-order and applicative-order evaluation.
+Compare gcd execution with applicative-order and normal-order evaluation.
 The question is how many time remainder is evaluated.
 #+BEGIN_SRC scheme :tangle 1.20.scm
 (define (gcd a b)
@@ -331,7 +331,7 @@ Evaluation of (gcd 206 40):
 (gcd 2  0)
 #+END_SRC
 
-Remainder is called 4th time with normal order evaluation.
+Remainder is called 4th time with applicative-order evaluation.
 
 
 With applicative order evaluation (using R for remainder):
@@ -348,7 +348,8 @@ With applicative order evaluation (using R for remainder):
         (R (R 206 40) (R 40 (R 206 40)))
 #+END_SRC
 
-Counting the if evaluation and the final evaluation: 1 + 2 + 4 + 7 + 4 = 18 remainder evaluations.
+Counting the if evaluation and the final evaluation: 1 + 2 + 4 + 7 + 4 = 18 remainder evaluations
+with normal-order.
 
 *** Exercise 1.21
 Test the smallest-divisor method with 199, 1999 and 19999:
