@@ -540,3 +540,136 @@ class EvaluateSICP(EvaluateScheme):
             except RuntimeError as e:
                 errors.append(str(e))
         return ", ".join(errors)
+
+    common_2_1 = """
+(define (add-rat x y)
+  (make-rat (+ (* (numer x) (denom y))
+               (* (numer y) (denom x)))
+            (* (denom x) (denom y))))
+(define (sub-rat x y)
+  (make-rat (- (* (numer x) (denom y))
+               (* (numer y) (denom x)))
+            (* (denom x) (denom y))))
+(define (mul-rat x y)
+  (make-rat (* (numer x) (numer y))
+            (* (denom x) (denom y))))
+(define (div-rat x y)
+  (make-rat (* (numer x) (denom y))
+            (* (denom x) (numer y))))
+(define (equal-rat? x y)
+  (= (* (numer x) (denom y))
+     (* (numer y) (denom x))))
+;; abstraction layer
+(define (make-rat n d) (cons n d))
+(define (numer x) (car x))
+(define (denom x) (cdr x))
+(define (print-rat x)
+  (newline)
+  (display (numer x))
+  (display "/")
+  (display (denom x)))
+
+(define (average a b) (/ (+ a b) 2))
+(define (print-point p)
+  (newline)
+  (display "(")
+  (display (x-point p))
+  (display ",")
+  (display (y-point p))
+  (display ")"))
+"""
+
+    def eval_2_1(self, fpath):
+        self.load(self.common_2_1)
+        self.load(fpath)
+        errors = []
+        for n, d, res in ((3, 4, "3/4"), (-3, 4, "-3/4"), (3, -4, "-3/4"),
+                          (-3, -4, "3/4")):
+            f = "(print-rat (make-rat %d %d))" % (n, d)
+            try:
+                r = self.eval(f)
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_2_2(self, fpath):
+        self.load(self.common_2_1)
+        self.load(fpath)
+        errors = []
+        for p1, p2, res in (("0 0", "2 2", "(1,1)"), ):
+            f = "(print-point (midpoint-segment (make-segment %s %s)))" % (
+                "(make-point %s)" % p1, "(make-point %s)" % p2)
+            try:
+                r = self.eval(f)
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_2_3(self, fpath):
+        self.load("""
+(define (make-segment x y) (cons x y))
+(define (start-segment s) (car s))
+(define (end-segment s) (cdr s))
+
+(define (make-point x y) (cons x y))
+(define (x-point p) (car p))
+(define (y-point p) (cdr p))
+
+(define (midpoint-segment s)
+  (make-point
+    (average (x-point (start-segment s))
+             (x-point (end-segment s)))
+    (average (y-point (start-segment s))
+             (y-point (end-segment s)))))
+""")
+        self.load(fpath)
+        errors = []
+        for p1, p2, perim, area in (("1 1", "5 2", 10, 4), ):
+            for func, res in (("perimeter", perim), ("area", area)):
+                f = "(%s-rectangle (make-rectangle %s %s))" % (
+                    func, "(make-point %s)" % p1, "(make-point %s)" % p2)
+                try:
+                    r = self.eval_value(f, int)
+                    if r != res:
+                        errors.append("%s is not the correct answer for %s" % (
+                            r, f))
+                except RuntimeError as e:
+                    errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_2_5(self, fpath):
+        self.load(fpath)
+        errors = []
+        for a, b in ((0, 1), (1, 0), (4, 2), (2, 3)):
+            f = "(cons %d %d)" % (a, b)
+            res = (2**a) * (3**b)
+            try:
+                r = self.eval_value(f, int)
+                if r != res:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+            f = "(cdr %d)" % res
+            try:
+                r = self.eval_value(f, int)
+                if r != b:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+            f = "(car %d)" % res
+            try:
+                r = self.eval_value(f, int)
+                if r != a:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
