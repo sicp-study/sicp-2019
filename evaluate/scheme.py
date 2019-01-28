@@ -136,6 +136,9 @@ class EvaluateScheme:
         if r != "1 ]=>":
             raise RuntimeError("Oops, something went wrong: %s" % r)
         result = self.scheme.stdout.readline().strip()
+        sink = result
+        while not sink.startswith(';'):
+            sink = self.scheme.stdout.readline().strip()
         self.log.debug("Received [%s]", result)
         return result
 

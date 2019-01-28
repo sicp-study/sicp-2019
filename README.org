@@ -70,7 +70,7 @@ DEADLINE: <2019-01-18 Fri>
 - For exercise 1.16, name the procedure (fast-expt-iterative b n)
 - For exercise 1.17, name the procedure (fast-mult a b)
 - For exercise 1.18, name the procedure (fast-mult-iterative a b)
-*** 1.3 (Formulating Abstractions with Higher-Order Procedures)
+*** DONE 1.3 (Formulating Abstractions with Higher-Order Procedures)
 DEADLINE: <2019-01-25 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2a.mp4][lecture]]
 
@@ -87,10 +87,11 @@ DEADLINE: <2019-01-25 Fri>
 - For exercise 1.44, name the procedure (nfold-smooth f n)
 - For exercise 1.45, name the procedure (nroot n x)
 ** Chapter 2
-*** 1.3.4 & 2.1.1 & 2.1.2 & 2.1.3 (Data Abstraction)
+*** 2.1.1 & 2.1.2 & 2.1.3 (Introduction to Data Abstraction)
 DEADLINE: <2019-02-01 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2b.mp4][lecture]]
 
+- For exercise 2.3, name the procedures (make-rectangle point1 point2), perimeter-rectangle and area-rectangle.
 *** 2.1.4 (Interval Arithmetic)
 DEADLINE: <2019-02-08 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4][lecture]]

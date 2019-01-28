@@ -67,7 +67,7 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 -   For exercise 1.18, name the procedure (fast-mult-iterative a b)
 
 
-### 1.3 (Formulating Abstractions with Higher-Order Procedures)
+### DONE 1.3 (Formulating Abstractions with Higher-Order Procedures)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-01-25 Fri&gt;</span></span></p>
 
@@ -86,11 +86,13 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 ## Chapter 2
 
 
-### 1.3.4 & 2.1.1 & 2.1.2 & 2.1.3 (Data Abstraction)
+### 2.1.1 & 2.1.2 & 2.1.3 (Introduction to Data Abstraction)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-02-01 Fri&gt;</span></span></p>
 
 [lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2b.mp4)
+
+-   For exercise 2.3, name the procedures (make-rectangle point1 point2), perimeter-rectangle and area-rectangle.
 
 
 ### 2.1.4 (Interval Arithmetic)
