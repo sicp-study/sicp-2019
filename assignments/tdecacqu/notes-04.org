@@ -1,0 +1,153 @@
+#+TITLE: SICP 2.1 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Introduction to Data Abstraction
+
+*** Exercise 2.1
+Define a better version of make-rat that handles both positive and negative arguments.
+
+#+BEGIN_SRC scheme :tangle 2.1.scm
+  (define (make-rat n d)
+    (if (or (and (>= n 0) (>= d 0))
+            (and (< n 0) (< d 0)))
+        (cons (abs n) (abs d))
+        (cons (- (abs n)) (abs d))))
+#+END_SRC
+
+*** Exercise 2.2
+Define a procedure midpoint-segment that takes a line segment as argument and returns its midpoint.
+
+#+BEGIN_SRC scheme :tangle 2.2.scm
+(define (make-segment x y) (cons x y))
+(define (start-segment s) (car s))
+(define (end-segment s) (cdr s))
+
+(define (make-point x y) (cons x y))
+(define (x-point p) (car p))
+(define (y-point p) (cdr p))
+
+(define (midpoint-segment s)
+  (make-point
+    (average (x-point (start-segment s))
+             (x-point (end-segment s)))
+    (average (y-point (start-segment s))
+             (y-point (end-segment s)))))
+#+END_SRC
+
+*** Exercise 2.3
+
+Implement a representation for rectangles in a plane.
+
+#+BEGIN_SRC scheme :tangle 2.3.scm
+(define (perimeter-rectangle r)
+  (* 2 (+ (height-rectangle r) (length-rectangle r))))
+(define (area-rectangle r) (* (height-rectangle r) (length-rectangle r)))
+;; abstraction
+(define (make-rectangle p q) (cons p q))
+(define (height-rectangle r) (abs (- (x-point (car r)) (x-point (cdr r)))))
+(define (length-rectangle r) (abs (- (y-point (car r)) (y-point (cdr r)))))
+#+END_SRC
+
+We could change the implementation to only store the height and length:
+
+#+BEGIN_SRC scheme
+(define (make-rectangle p q) (cons (abs (- (x-point p) (x-point q)))
+                                   (abs (- (y-point p) (y-point q)))))
+(define (height-rectangle r) (car r))
+(define (length-rectangle r) (cdr r))
+#+END_SRC
+
+*** Exercise 2.4
+
+Implement cdr using procedural representation of pairs:
+
+#+BEGIN_SRC scheme :tangle 2.4.scm
+(define (cons x y)
+  (lambda (m) (m x y)))
+
+(define (car z)
+  (z (lambda (p q) p)))
+
+(define (cdr z)
+  (z (lambda (p q) q)))
+(cdr (cons 4 5))
+#+END_SRC
+
+Substitution model of cdr:
+#+BEGIN_SRC txt
+(cdr (cons 4 5))
+(cdr (lambda (m) (m 4 5)))
+((lambda (m) (m 4 5)) (lambda (p q) q))
+((lambda (p q) q) 4 5)
+5
+#+END_SRC
+
+*** Exercise 2.5
+
+Implement cons, car and cdr using an integer of the form 2^a * 3^b:
+
+#+BEGIN_SRC scheme :tangle 2.5.scm
+;; Sample procedure from previous exercise:
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+(define (exp b n)
+  (define (iter b n a)
+    (cond ((= n 0) a)
+          ((even? n) (iter (* b b) (/ n 2) a))
+          (else (iter b (- n 1) (* a b)))))
+  (iter b n 1))
+
+;; Pairs using gcd loop
+(define (cons a b) (* (exp 2 a) (exp 3 b)))
+(define (unpack c mod)
+  (define (iter x counter)
+    (if (= (gcd x mod) 1)
+        counter
+        (iter (/ x mod) (+ counter 1))))
+  (iter c 0))
+(define (car c) (unpack c 2))
+(define (cdr c) (unpack c 3))
+#+END_SRC
+
+*** Exercise 2.6
+
+Church numerals:
+
+#+BEGIN_SRC scheme :tangle 2.6.scm
+(define zero (lambda (f) (lambda (x) x)))
+
+(define (add-1 n)
+  (lambda (f) (lambda (x) (f ((n f) x)))))
+#+END_SRC
+
+The author suggests to evaluate using subsitution (add-1 zero):
+#+BEGIN_SRC txt
+(add-1 zero)
+(add-1 (lambda (f) (lambda (x) x)))
+(lambda (a)
+  (lambda (x) (a (((lambda (f) (lambda (x) x)) a)) x)))
+(lambda (a)
+  (lambda (x) (a x)))
+#+END_SRC
+
+The definition and the hint didn't helped me, and looking at the wikipedia
+page states that Church numerals are defined by the number of function call:
+
+#+BEGIN_SRC scheme :tangle 2.6.scm
+;; One applies the function once
+(define one (lambda (f) (lambda (x) (f x))))
+;; Two applies the function twice
+(define two (lambda (f) (lambda (x) (f (f x)))))
+#+END_SRC
+
+Thus add can be defined by composing the two parameter:
+
+#+BEGIN_SRC scheme :tangle 2.6.scm
+(define (add a b)
+  (lambda (f) (lambda (x) ((a f) ((b f) x)))))
+#+END_SRC
