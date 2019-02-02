@@ -1,0 +1,471 @@
+#+TITLE: SICP 1.3 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* The Elements of Programming
+** Formulating Abstractions with Higher-Order Procedures
+Higher-Order Procedures are procedures that manipulates procedures.
+
+Programing language first class citizen can:
+- be named as variables,
+- be used as procedures' argument,
+- be returned by procedures, and
+- be included in data structures.
+
+Common code:
+#+BEGIN_SRC scheme
+(define tolerance 0.00001)
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+(define (square x) (* x x))
+(define (cube x) (* x x x))
+(define (even? n) (= (remainder n 2) 0))
+(define (identity x) x)
+(define (smallest-divisor n)
+  (define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+          ((divides? test-divisor n) test-divisor)
+          (else (find-divisor n (+ test-divisor 1)))))
+  (define (divides? a b)
+    (= (remainder b a) 0))
+  (find-divisor n 2))
+(define (prime? n)
+  (= n (smallest-divisor n)))
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+(define (average a b) (/ (+ a b) 2))
+#+END_SRC
+
+*** Exercise 1.29
+Compute integrale using the Simpson's rule
+#+BEGIN_SRC scheme :tangle 1.29.scm
+(define (simpson-integral f a b n)
+  (define h (/ (- b a) n))
+  (define (y-mult k y)
+    (cond ((= k 0) y)
+          ((= k n) y)
+          ((even? k) (* 2 y))
+          (else (* 4 y))))
+  (define (y k)
+    (y-mult k (f (+ a (* k h)))))
+  (* (/ h 3) (sum y 0 1+ n)))
+(simpson-integral cube 0 1. 1000)
+#+END_SRC
+The results are more precises than the previous
+implementation.
+
+*** Exercise 1.30
+An iterative implementation of the sum process:
+#+BEGIN_SRC scheme :tangle 1.30.scm
+  (define (sum term a next b)
+    (define (iter a result)
+      (if (> a b)
+          result
+          (iter (next a) (+ result (term a)))))
+    (iter a 0))
+
+  (sum (lambda (x) x) 1 1+ 10)
+#+END_SRC
+
+*** Exercise 1.31
+Implementations of the product process, analogous to the sum process.
+
+#+BEGIN_SRC scheme :tangle 1.31.scm
+  (define (product-recursive term a next b)
+    (if (> a b)
+        1
+        (* (term a)
+           (product term (next a) next b))))
+
+  (define (product term a next b)
+    (define (iter a result)
+      (if (> a b)
+          result
+          (iter (next a) (* result (term a)))))
+    (iter a 1))
+
+  (product (lambda (x) x) 1 1+ 5)
+#+END_SRC
+
+Then implement factorial in term of product:
+
+#+BEGIN_SRC scheme :tangle 1.31.scm
+(define (factorial n)
+  (product identity 1 1+ n))
+#+END_SRC
+
+And approximate pi using John Wallis formula:
+
+#+BEGIN_SRC txt
+pi / 4 = (2 * 4 * 4 * 6 * 6 * 8) /
+         (3 * 3 * 5 * 5 * 7 * 7)
+#+END_SRC
+
+Let's rewrite this as:
+
+#+BEGIN_SRC txt
+pi = 8 * (4 * 4 * 6 * 6 * 8) /
+         (3 * 3 * 5 * 5 * 7 * 7)
+#+END_SRC
+
+We can define a product procedure to process: ((square  x) * (square (+ x 2) * (square (+ x 4) ...))):
+
+#+BEGIN_SRC scheme :tangle 1.31.scm
+(define (jwp a b)
+  (product square a (lambda (x) (+ x 2)) b))
+#+END_SRC
+
+And rewrite pi using (jwp 4 (1+ n)) * (+ n 2) for the first product and (jwp 3 (1+ n)) for the second:
+
+#+BEGIN_SRC scheme :tangle 1.31.scm
+(define (john-wallis-pi n)
+  (/ (* 8. (jwp 4 (1+ n)) (+ n 2))
+     (jwp 3 (1+ n))))
+(john-wallis-pi 6)
+(john-wallis-pi 32)
+#+END_SRC
+
+*** Exercise 1.32
+
+Write sum and product using an accumulate procedure:
+
+#+BEGIN_SRC scheme :tangle 1.32.scm
+  (define (accumulate-recursive combiner null-value term a next b)
+    (if (> a b)
+        null-value
+        (combiner (term a)
+                  (accumulate-recursive combiner
+                                        null-value
+                                        term
+                                        (next a)
+                                        next
+                                        b))))
+
+  (define (accumulate combiner null-value term a next b)
+    (define (iter a result)
+      (if (> a b)
+          result
+          (iter (next a) (combiner result (term a)))))
+    (iter a null-value))
+
+  (define (sum term a next b)
+    (accumulate + 0 term a next b))
+  (define (product term a next b)
+    (accumulate * 1 term a next b))
+#+END_SRC
+
+*** Exercise 1.33
+
+Improve the accumulate process using a filter procedure:
+
+#+BEGIN_SRC scheme :tangle 1.33.scm
+  (define (filtered-accumulate combiner null-value term a next b filter)
+    (define (iter a result)
+      (if (> a b)
+          result
+          (iter (next a) (if (filter a)
+                             (combiner result (term a))
+                             result))))
+    (iter a null-value))
+#+END_SRC
+
+Then the sum of the squares of the prime numbers in the interval a to b:
+
+#+BEGIN_SRC scheme :tangle 1.33.scm
+(define (sum-square-prime a b)
+  (filtered-accumulate + 0 square a 1+ b prime?))
+#+END_SRC
+
+The product of all the positive integers less than n that are relatively prime to n:
+
+#+BEGIN_SRC scheme :tangle 1.33.scm
+(define (sum-coprime n)
+  (filtered-accumulate + 0 identity 1 1+ n (lambda (x) (= (gcd x n) 1))))
+(sum-coprime 10)
+#+END_SRC
+
+*** Exercise 1.34
+
+Given:
+
+#+BEGIN_SRC scheme
+(define (f g)
+  (g 2))
+#+END_SRC
+
+What happens when evaluationg (f f):
+
+- (f 2)  ;; 2 become the operand g of f
+- (2 2)  ;; results in error because 2 is not an operator.
+
+*** Exercise 1.35
+
+Show that the golden ratio (section 1.2.2) is a fixed point of the transformation x -> 1 + 1/x:
+
+x * x = x + 1, which is the definition of the golden ratio given in section 1.2.2.
+
+Given:
+
+#+BEGIN_SRC scheme :tangle 1.35.scm
+(define tolerance 0.00001)
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+          next
+          (try next))))
+  (try first-guess))
+#+END_SRC
+
+We can compute the golden ratio using the fixed-point of x*x - x - 1
+
+#+BEGIN_SRC scheme :tangle 1.35.scm
+(define golden-ratio (fixed-point (lambda (x) (1+ (/ 1 x))) 1.))
+golden-ratio
+#+END_SRC
+
+*** Exercise 1.36
+
+Investigate fixed-point with average damping:
+
+#+BEGIN_SRC scheme :tangle 1.35.scm
+(define tolerance 0.00001)
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (write guess)(newline)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+          next
+          (try next))))
+  (try first-guess))
+
+(fixed-point (lambda (x) x) 10)
+(fixed-point (lambda (x) (/ (log 1000) (log x))) 2)
+(fixed-point (lambda (x) (average x (/ (log 1000) (log x)))) 2)
+#+END_SRC
+
+Without average, it takes 32 iterations, and with average damping it's only 8 iterations.
+
+*** Exercise 1.37
+
+Implement a k-term finite continued fraction:
+
+#+BEGIN_SRC scheme :tangle 1.37.scm
+(define (cont-frac-recursive n d k)
+  (define (iter x)
+    (/ (n x)
+       (+ (d x) (if (> x k) 0 (iter (1+ x))))))
+  (iter 1))
+(cont-frac-recursive (lambda (i) 1.0)
+                     (lambda (i) 1.0)
+                     10)
+#+END_SRC
+It takes 10 iterations to reach 0.6180.
+
+In iterative:
+#+BEGIN_SRC scheme :tangle 1.37.scm
+(define (cont-frac n d k)
+  (define (iter x result)
+    (if (= x 0)
+        result
+        (iter (- x 1) (/ (n x)
+                         (+ (d x) result)))))
+  (iter k 0))
+#+END_SRC
+
+*** Exercise 1.38
+
+Compute Euler's number using cont-frac:
+#+BEGIN_SRC scheme :tangle 1.38.scm
+  (define (euler-sequence k)
+    (let ((n (- k 2)))
+      (cond ((= (remainder n 3) 0) (+ 2 (* 2 (/ n 3.))))
+            (else 1))))
+
+  (define (euler-number k)
+          (cont-frac (lambda (x) 1) euler-sequence k))
+  (euler-number 20)
+#+END_SRC
+
+*** Exercise 1.39
+
+Compute Lambert's tan approximation using cont-frac:
+#+BEGIN_SRC scheme :tangle 1.39.scm
+(define (tan-cf x k)
+  (cont-frac (lambda (k) (if (= k 1) x (- (square x))))
+             (lambda (k) (+ 1 (* 2 (- k 1))))
+             (/ k 1.0)))
+(tan-cf 0.5 20)
+#+END_SRC
+
+*** Exercise 1.40
+
+Given:
+#+BEGIN_SRC scheme :tangle 1.40.scm
+(define dx 0.00001)
+(define (deriv g)
+  (lambda (x)
+    (/ (- (g (+ x dx)) (g x))
+       dx)))
+(define (newton-transform g)
+  (lambda (x)
+    (- x (/ (g x) ((deriv g) x)))))
+
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+#+END_SRC
+
+Define a cubic method to approximate zeros of x^3 + ax^2 + bx + c:
+
+#+BEGIN_SRC scheme :tangle 1.40.scm
+(define (cubic a b c)
+  (lambda (x) (+ (cube x) (* a (square x)) (* b x) c)))
+#+END_SRC
+
+Note, it's really nice how scheme enable such simple means of abstraction.
+
+*** Exercise 1.41
+
+Define a procedure double that returns a procedure applies its argument twice:
+#+BEGIN_SRC scheme :tangle 1.41.scm
+(define (double f) (lambda (x) (f (f x))))
+#+END_SRC
+
+The example expands like so:
+#+BEGIN_SRC txt
+(((double (double double)) inc) 5)
+((double (double (double (double inc)))) 5)
+((inc applies 2**4 times) 5)
+21
+#+END_SRC
+
+*** Exercise 1.42
+
+Define a (compose f g) procedure that implements: x = f(g(x)):
+
+#+BEGIN_SRC scheme :tangle 1.42.scm
+(define (compose f g)
+  (lambda (x) (f (g x))))
+((compose cube square) 42)
+#+END_SRC
+
+*** Exercise 1.43
+
+Define a (repeated f n) procedure that applies f n times:
+
+#+BEGIN_SRC scheme :tangle 1.43.scm
+(define (repeated f n)
+  (if (= n 1)
+      (lambda (x) (f x))
+      (compose f (repeated f (- n 1)))))
+#+END_SRC
+
+*** Exercise 1.44
+
+Define a (smooth f) procedure that f(x - dx), f(x), and f(x + dx):
+
+#+BEGIN_SRC scheme :tangle 1.44.scm
+(define (avg x y z) (/ (+ x y z) 3))
+(define (smooth f)
+  (lambda (x) (avg (f (- x dx)) (f x) (f (+ x dx)))))
+((smooth square) 2)
+#+END_SRC
+
+Then define a (nfold-smooth f n) that applies smooth n time:
+#+BEGIN_SRC scheme :tangle 1.44.scm
+(define (nfold-smooth f n)
+  ((repeated smooth n) f))
+#+END_SRC
+
+*** Exercise 1.45
+
+Find how many time average-damp is needed to get the fixed-point of x / y**3
+#+BEGIN_SRC scheme :tangle 1.45.scm
+(define (exp b n)
+  (define (iter b n a)
+    (cond ((= n 0) a)
+          ((even? n) (iter (* b b) (/ n 2) a))
+          (else (iter b (- n 1) (* a b)))))
+  (iter b n 1))
+(define (average-damp f)
+  (lambda (x) (average x (f x))))
+(define (fourth-root x)
+  (fixed-point (average-damp (average-damp (lambda (y) (/ x (exp y 3)))))
+               1.0))
+(fourth-root 9)
+#+END_SRC
+2 average damp is enough to get the fixed-point. Let's repeat average-damp n-2 time
+for nroot:
+
+#+BEGIN_SRC scheme :tangle 1.45.scm
+  (define (nroot n x)
+    (fixed-point ((if (< n 4)
+                      average-damp
+                      (repeated average-damp (- n 2)))
+                        (lambda (y) (/ x (exp y (- n 1)))))
+                 1.0))
+#+END_SRC
+
+*** Exercise 1.46
+
+Abstract the iterative improvement process for sqrt and fixed-point:
+
+#+BEGIN_SRC scheme
+  ;; Sqrt from 1.1.7 rewritten using let:
+  (define (sqrt x)
+    (define (goodenough? guess old-guess)
+      (<= (abs (- old-guess guess)) (* guess .001)))
+    (define (improve guess) (average guess (/ x guess)))
+    (define (sqrt-iter guess)
+      (let ((new-guess (improve guess)))
+        (if (goodenough? guess new-guess)
+              new-guess
+              (sqrt-iter new-guess))))
+    (sqrt-iter 1.0))
+
+  (define (fixed-point f first-guess)
+    (define (close-enough? v1 v2)
+      (< (abs (- v1 v2)) tolerance))
+    (define (try guess)
+      (let ((next (f guess)))
+        (if (close-enough? guess next)
+            next
+            (try next))))
+    (try first-guess))
+#+END_SRC
+
+Using an abstract iterative-improvement procedure (and a common close-enough? test),
+we can rewrite sqrt and fixed-point like so:
+#+BEGIN_SRC scheme :tangle 1.46.scm
+  (define (close-enough? x y)
+    (<= (abs (- x y)) 0.001))
+
+  (define (iterative-improvement improve good-enugh?)
+    (lambda (x)
+      (define (iter guess)
+        (if (good-enugh? guess)
+            guess
+            (iter (improve guess))))
+      (iter x)))
+  (iterative-improvement 0 0)
+
+  (define (sqrt x)
+    ((iterative-improvement (lambda (guess) (average guess (/ x guess)))
+                            (lambda (guess) (close-enough? x (square guess))))
+     1.0))
+
+  (define (fixed-point f first-guess)
+    ((iterative-improvement (lambda (guess) (f guess))
+                            (lambda (guess) (close-enough? guess (f guess))))
+     first-guess))
+#+END_SRC
