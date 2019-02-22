@@ -673,3 +673,108 @@ class EvaluateSICP(EvaluateScheme):
             except RuntimeError as e:
                 errors.append(str(e))
         return ", ".join(errors)
+
+    common_interval = """
+(define (make-interval a b) (cons a b))
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+                 (+ (upper-bound x) (upper-bound y))))
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+        (p2 (* (lower-bound x) (upper-bound y)))
+        (p3 (* (upper-bound x) (lower-bound y)))
+        (p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
+(define (div-interval x y)
+  (mul-interval x
+                (make-interval (/ 1.0 (upper-bound y))
+                               (/ 1.0 (lower-bound y)))))
+"""
+
+    def eval_2_7(self, fpath):
+        self.load(self.common_interval)
+        self.load(fpath)
+        errors = []
+        for lower, upper in ((-1, 2), (1, 3), (0, 5)):
+            for f, expected in (("lower", lower), ("upper", upper)):
+                f = "(%s-bound (make-interval %d %d))" % (f, lower, upper)
+                try:
+                    r = self.eval_value(f, int)
+                    if r != expected:
+                        errors.append("%s is not the correct answer for %s" % (
+                            r, f))
+                except RuntimeError as e:
+                    errors.append(str(e))
+
+        return ", ".join(errors)
+
+    def eval_2_8(self, fpath):
+        # TODO...
+        return
+
+    def eval_2_10(self, fpath):
+        # TODO
+        return
+
+    def eval_2_11(self, fpath):
+        self.load("""
+(define (make-interval x y) (cons x y))
+(define (upper-bound i) ((if (> (car i) (cdr i)) car cdr) i))
+(define (lower-bound i) ((if (> (car i) (cdr i)) cdr car) i))
+(define (original-mul x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+        (p2 (* (lower-bound x) (upper-bound y)))
+        (p3 (* (upper-bound x) (lower-bound y)))
+        (p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
+""")
+        self.load(fpath)
+        errors = []
+        cases = ((-2, -1), (-1, 0), (-2, 2), (0, 0), (0, 1), (1, 2))
+        for x in cases:
+            for y in cases:
+                op = "(make-interval %d %d) (make-interval %d %d)" % (
+                    x[0], x[1], y[0], y[1])
+                expected_lower = self.eval_value(
+                    "(lower-bound (original-mul %s))" % op, int)
+                expected_upper = self.eval_value(
+                    "(upper-bound (original-mul %s))" % op, int)
+                try:
+                    lower = self.eval_value(
+                        "(lower-bound (mul-interval %s))" % op, int)
+                    upper = self.eval_value(
+                        "(upper-bound (mul-interval %s))" % op, int)
+                    if lower != expected_lower or upper != expected_upper:
+                        errors.append(
+                            "(%s %s) is not the correct answer for %s" % (
+                                lower, upper, "(mul-interval %s)" % op))
+                except RuntimeError as e:
+                    errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_2_12(self, fpath):
+        self.load(self.common_interval)
+        self.load("""
+(define (upper-bound i) ((if (> (car i) (cdr i)) car cdr) i))
+(define (lower-bound i) ((if (> (car i) (cdr i)) cdr car) i))
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i)) 2))
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+""")
+        self.load(fpath)
+        errors = []
+        for center, percent in ((100, 10.), (42, 10.), (1, .5)):
+            op = "(percent (make-center-percent %d %f))" % (center, percent)
+            try:
+                r = round(self.eval_value(op, float), 3)
+                if r != percent:
+                    errors.append("%s is not the correct answer for %s" % (
+                        r, op))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)

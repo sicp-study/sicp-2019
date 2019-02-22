@@ -91,6 +91,9 @@ class EvaluateScheme:
                 yield sexp
                 sexp = ''
             idx += 1
+        if sexp.strip() != '':
+            raise RuntimeError(
+                "Couldn't load %s (remained [%s])" % (fpath, sexp))
 
     def get_statement(self, fpath):
         statements = list(self.iter_statements(fpath))
