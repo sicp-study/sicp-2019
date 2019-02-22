@@ -1,0 +1,151 @@
+#+TITLE: SICP 2.1.4 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Introduction to Data Abstraction (Interval Arithmetic)
+
+
+*** Exercise 2.7
+
+Define the upper-bound and lower-bound selector for Alyssa's interval data
+
+#+BEGIN_SRC scheme :tangle 2.7.scm
+  (define (upper-bound i)
+    ((if (> (car i) (cdr i)) car cdr) i))
+  (define (lower-bound i)
+    ((if (> (car i) (cdr i)) cdr car) i))
+#+END_SRC
+
+*** Exercise 2.8
+
+Define the sub-interval procedure. This is similar to the add-interval procedure:
+
+#+BEGIN_SRC scheme :tangle 2.8.scm
+(define (sub-interval x y)
+  (maxe-interval (- (lower-bound x) (lower-bound y))
+                 (- (upper-bound x) (upper-bound y))))
+#+END_SRC
+
+*** Exercise 2.9
+
+Show that the width of the sum (or difference) of two intervals is a function
+only of the widths of the intervals being added (or subtracted).
+Give examples to show that this is not true for multiplication or division.
+
+#+BEGIN_SRC txt
+The width of (10, 11) is 0.5; The width of (20, 30) is 5;
+The sum of (10, 11) and (20, 30) is (30, 41), width is 5.5.
+Width of sum = sum of width
+
+The mul of (10, 11) and (20, 30) is (200, 330), width is 65;
+Where the mul of (0, 1) and (20, 30) is (0, 30), width is 15;
+Width of product isn't a function of operand's width.
+#+END_SRC
+
+
+*** Exercise 2.10
+
+Update the given div-interval procedure to error on division by zero.
+
+#+BEGIN_SRC scheme :tangle 2.10.scm
+  (define (div-interval x y)
+    (let ((u (upper-bound y))
+          (l (lower-bound y)))
+      (if (or (= u 0) (= l 0))
+          (error "Can't divide with interval" y)
+          (mul-interval x (make-interval (/ 1.0 u) (/ 1.0 l))))))
+#+END_SRC
+
+*** Exercise 2.11
+
+Update the mul-interval procedure according to Ben's suggestion.
+
+#+BEGIN_SRC scheme :tangle 2.11.scm
+  (define (mul-interval x y)
+    ;; The multiplication depends on if:
+    ;;  interval is fully negative,
+    ;;  interval span accross zero,
+    ;;  interval is fully positive.
+    (define (interval-sign l u)
+      (cond ((and (< l 0) (< u 0)) -1)
+            ((and (>= l 0) (>= u 0)) 1)
+            (#t 0)))
+    ;; First select bounds
+    (let ((l1 (lower-bound x))
+          (l2 (lower-bound y))
+          (u1 (upper-bound x))
+          (u2 (upper-bound y)))
+      ;; Then compute interval sign
+      (let ((s1 (interval-sign l1 u1))
+            (s2 (interval-sign l2 u2)))
+        ;; Build the 9 cases
+        (cond
+         ;; One is negative, the other is positive
+         ((and (> s1 0) (< s2 0)) (make-interval (* u1 l2) (* u2 l1)))
+         ((and (> s2 0) (< s1 0)) (make-interval (* u2 l1) (* u1 l2)))
+         ;; One is positive, the other span zero
+         ((and (> s1 0) (= s2 0)) (make-interval (* l2 u1) (* u2 u1)))
+         ((and (> s2 0) (= s1 0)) (make-interval (* l1 u2) (* u1 u2)))
+         ;; One is negative the other span zero
+         ((and (< s1 0) (= s2 0)) (make-interval (* l1 u2) (* l1 l2)))
+         ((and (< s2 0) (= s1 0)) (make-interval (* l2 u1) (* l1 l2)))
+         ;; Both are positive or negative
+         ((and (> s1 0) (> s2 0)) (make-interval (* l1 l2) (* u1 u2)))
+         ((and (< s1 0) (< s2 0)) (make-interval (* u1 u2) (* l1 l2)))
+         ;; Both span accross zero
+         ((and (= s1 0) (= s2 0))
+          (make-interval (min (* l1 u2) (* l2 u1))
+                         (max (* l1 l2) (* u1 u2))))))))
+#+END_SRC
+
+Ben has shitty advice =), Alyssa shouldn't listen to him.
+
+*** Exercise 2.12
+
+Define a constructor make-center-percent that takes a center and a percentage
+tolerance and produces the desired interval. You must also define a selector
+percent that produces the percentage tolerance for a given interval.
+
+#+BEGIN_SRC scheme :tangle 2.12.scm
+(define (make-center-percent center percent)
+  (make-center-width center (* center (/ percent 100))))
+(define (percent interval)
+  (* (/ (width interval) (center interval)) 100))
+#+END_SRC
+
+*** Exercise 2.13
+
+Show that under the assumption of small percentage tolerances there is a simple
+formula for the approximate percentage tolerance of the product of two intervals
+
+#+BEGIN_SRC scheme
+(percent (mul-interval (make-center-percent 10 5) (make-center-percent 100 1)))
+;; -> 5.99
+(percent (mul-interval (make-center-percent 1 4) (make-center-percent 100 0.2)))
+;; -> 4.2
+#+END_SRC
+
+It seems like percentage tolerance of the product of two intervals is the sums of the
+percentage.
+
+*** Exercise 2.14
+
+Demonstrate that Lem is right.
+#+BEGIN_SRC scheme
+(par1 (make-interval 5 6) (make-interval 3 4))
+;Value: (1.5 . 3.)
+(par2 (make-interval 5 6) (make-interval 3 4))
+;Value: (1.875 . 2.4000000000000004)
+#+END_SRC
+
+And it seems like some A/A give incorrect results:
+#+BEGIN_SRC scheme
+(div-interval (make-interval 5 6) (make-interval 5 6))
+;Value: (.8333333333333333 . 1.2000000000000002)
+#+END_SRC
+
+*** Exercise 2.15/2.16
+
+Interval arithmetic is harder than it seemed.
