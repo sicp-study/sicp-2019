@@ -87,25 +87,28 @@ DEADLINE: <2019-01-25 Fri>
 - For exercise 1.44, name the procedure (nfold-smooth f n)
 - For exercise 1.45, name the procedure (nroot n x)
 ** Chapter 2
-*** 2.1.1 & 2.1.2 & 2.1.3 (Introduction to Data Abstraction)
+*** DONE 2.1.1 & 2.1.2 & 2.1.3 (Introduction to Data Abstraction)
 DEADLINE: <2019-02-01 Fri>
-[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2b.mp4][lecture]]
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2b.mp4][lecture-2b]]
 
 - For exercise 2.3, name the procedures (make-rectangle point1 point2), perimeter-rectangle and area-rectangle.
-*** 2.1.4 (Interval Arithmetic)
+*** DONE 2.1.4 (Interval Arithmetic)
 DEADLINE: <2019-02-08 Fri>
-[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4][lecture]]
 
-*** 2.2.1 & 2.2.2 (Hierarchical Structures)
+*** 2.2.1 & 2.2.2 (Hierarchical Data and the Closure Property)
 DEADLINE: <2019-02-15 Fri>
-[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4][lecture]]
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4][lecture 3a (first half)]]
 
 *** 2.2.3 (Sequences as Conventional Interfaces)
 DEADLINE: <2019-02-22 Fri>
 
 *** 2.2.4 (A Picture Language)
 DEADLINE: <2019-03-01 Fri>
-[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4][lecture]]
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4][lecture 3a (second half)]]
+
+NEXT:
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4][lecture-3b]]
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4][lecture-4a]]
 
 *** 2.3.1 & 2.3.2 (Symbolic Differentiation)
 DEADLINE: <2019-03-08 Fri>
