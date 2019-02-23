@@ -63,18 +63,20 @@ The order doesn't affect the answer.
 Use the dotted-tail notation to write a procedure same-parity.
 
 #+BEGIN_SRC scheme :tangle 2.20.scm
-  (define (same-parity . l)
+  (define (same-parity first-elem . rest-elems)
     (define (even? n)
       (= (remainder n 2) 0))
-    (define parity (even? (car l)))
+    (define parity (even? first-elem))
     (define (iter list result)
       (if (null? list)
+          ;; We need to reverse the result when constructing
+          ;; the list with this iterative process
           (reverse result)
           (iter (cdr list)
                 (if (equal? (even? (car list)) parity)
                     (cons (car list) result)
                     result))))
-    (iter (cdr l) (list (car l))))
+    (iter rest-elems (list first-elem)))
 #+END_SRC
 
 *** Exercise 2.21
