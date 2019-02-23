@@ -95,9 +95,12 @@ DEADLINE: <2019-02-01 Fri>
 *** DONE 2.1.4 (Interval Arithmetic)
 DEADLINE: <2019-02-08 Fri>
 
-*** 2.2.1 & 2.2.2 (Hierarchical Data and the Closure Property)
+*** DONE 2.2.1 & 2.2.2 (Hierarchical Data and the Closure Property)
 DEADLINE: <2019-02-15 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4][lecture 3a (first half)]]
+
+- For exercise 2.29, assume a list based implementation of mobile and branch
+- For exercise 2.30, name the functions square-tree and square-tree-with-map
 
 *** 2.2.3 (Sequences as Conventional Interfaces)
 DEADLINE: <2019-02-22 Fri>
