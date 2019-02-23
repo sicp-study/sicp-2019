@@ -778,3 +778,120 @@ class EvaluateSICP(EvaluateScheme):
             except RuntimeError as e:
                 errors.append(str(e))
         return ", ".join(errors)
+
+    def eval_2_17(self, fpath):
+        self.load(fpath)
+        f = "(last-pair (list 44 43 42))"
+        try:
+            r = self.eval_value(f, list)
+            if r != [42]:
+                return "%s is not the correct answer for %s" % (r, f)
+        except RuntimeError as e:
+            return str(e)
+
+    def eval_2_18(self, fpath):
+        self.load(fpath)
+        f = "(reverse (list 4 3 2 1))"
+        try:
+            r = self.eval_value(f, list)
+            if r != [1, 2, 3, 4]:
+                return "%s is not the correct answer for %s" % (r, f)
+        except RuntimeError as e:
+            return str(e)
+
+    def eval_2_19(self, fpath):
+        self.load("""
+(define us-coins (list 50 25 10 5 1))
+(define uk-coins (list 100 50 20 10 5 2 1 0.5))
+(define (cc amount coin-values)
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (no-more? coin-values)) 0)
+        (else
+         (+ (cc amount
+                (except-first-denomination coin-values))
+            (cc (- amount
+                   (first-denomination coin-values))
+                coin-values)))))
+""")
+        self.load(fpath)
+        f = "(cc 100 us-coins)"
+        try:
+            r = self.eval_value(f, int)
+            if r != 292:
+                return "%s is not the correct answer for %s" % (r, f)
+        except RuntimeError as e:
+            return str(e)
+
+    def eval_2_20(self, fpath):
+        self.load(fpath)
+        errors = []
+        for f, e in (("(same-parity 1 2 3 4 5 6 7)", [1, 3, 5, 7]),
+                     ("(same-parity 2 3 4 5 6 7)", [2, 4, 6])):
+            try:
+                r = self.eval_value(f, list)
+                if r != e:
+                    errors.append(
+                        "%s is not the correct answer for %s" % (r, f))
+            except RuntimeError as e:
+                errors.append(str(e))
+        return ", ".join(errors)
+
+    def eval_2_28(self, fpath):
+        self.load(fpath)
+        f = "(fringe (list (list 1 2) (list 3 4)))"
+        r = self.eval_value(f, list)
+        if r != [1, 2, 3, 4]:
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_29(self, fpath):
+        self.load("""
+(define (make-mobile left right) (list left right))
+(define (make-branch length structure) (list length structure))
+""")
+        self.load(fpath)
+        f = """
+(total-weight (make-mobile (make-branch 1 1)
+                           (make-branch 1 (make-mobile (make-branch 1 21)
+                                                       (make-branch 1 22)))))
+"""
+        r = self.eval_value(f, int)
+        if r != 44:
+            return "%s is not the correct answer for %s" % (r, f)
+
+        f = """
+(balanced? (make-mobile (make-branch 5 1)
+                        (make-branch 1 (make-mobile (make-branch 1 4)
+                                                    (make-branch 1 1)))))
+"""
+        r = self.eval_value(f, str)
+        if r != "#t":
+            return "%s is not the correct answer for %s" % (r, f)
+
+        f = "(balanced? (make-mobile (make-branch 5 1) (make-branch 5 5)))"
+        r = self.eval_value(f, str)
+        if r != "#f":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_30(self, fpath):
+        self.load("""(define nil '())""")
+        self.load(fpath)
+        for test in ("square-tree", "square-tree-with-map"):
+            f = "(%s (list 1 (list 2 (list 3 4) 5) (list 6 7)))" % test
+            r = self.eval_value(f, str)
+            if r != "(1 (4 (9 16) 25) (36 49))":
+                return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_31(self, fpath):
+        self.load(fpath)
+        self.load("(define (square-tree tree) (tree-map square tree))")
+        f = "(square-tree (list 1 (list 2 (list 3 4) 5) (list 6 7)))"
+        r = self.eval_value(f, str)
+        if r != "(1 (4 (9 16) 25) (36 49))":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_32(self, fpath):
+        self.load(fpath)
+        f = "(subsets (list 1 2 3))"
+        r = self.eval_value(f, str)
+        if r != "(() (3) #0=(2) #1=(2 3) (1) (1 3) (1 . #0#) (1 . #1#))":
+            return "%s is not the correct answer for %s" % (r, f)

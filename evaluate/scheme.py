@@ -120,6 +120,7 @@ class EvaluateScheme:
 
     def load(self, fpath):
         """Load the content of fpath"""
+        print("Loading %s" % fpath)
         if not self.scheme:
             self.open()
         for statement in self.iter_statements(fpath):
@@ -145,13 +146,20 @@ class EvaluateScheme:
         self.log.debug("Received [%s]", result)
         return result
 
-    def eval_value(self, statement, vtype):
-        ret = self.eval(statement).split()
+    def eval_value(self, statement, vtype, ltype=int):
+        ret = self.eval(statement).split(" ", 1)
         if ret[0] != ";Value:":
             raise RuntimeError(
                 "%s should have returned a value instead of [%s]" % (
                     statement, " ".join(ret)))
         try:
+            if vtype == list:
+                if ret[1][0] != '(' and ret[1][-1] != ')':
+                    raise RuntimeError("%s is not a list" % ret[1])
+                l = ret[1][1:-1].split()
+                if ltype:
+                    l = list(map(ltype, l))
+                return l
             return vtype(ret[1])
         except ValueError:
             raise RuntimeError("%s should have returned a %s (was %s)" % (
