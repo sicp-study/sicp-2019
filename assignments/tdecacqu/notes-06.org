@@ -1,0 +1,320 @@
+#+TITLE: SICP 2.2 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Hierarchical Data and the Closure Property
+
+*** Exercise 2.17
+
+#+BEGIN_SRC scheme :tangle 2.17.scm
+  (define (last-pair l)
+    (if (null? (cdr l))
+        l
+        (last-pair (cdr l))))
+#+END_SRC
+
+*** Exercise 2.18
+
+#+BEGIN_SRC scheme :tangle 2.18.scm
+  (define (reverse l)
+    (define (iter l r)
+      (if (null? l)
+          r
+          (iter (cdr l) (cons (car l) r))))
+    (iter l '()))
+#+END_SRC
+
+*** Exercise 2.19
+
+Given
+
+#+BEGIN_SRC scheme :tangle 2.19.scm
+  (define us-coins (list 50 25 10 5 1))
+  (define uk-coins (list 100 50 20 10 5 2 1 0.5))
+  (define (cc amount coin-values)
+    (cond ((= amount 0) 1)
+          ((or (< amount 0) (no-more? coin-values)) 0)
+          (else
+           (+ (cc amount
+                  (except-first-denomination coin-values))
+              (cc (- amount
+                     (first-denomination coin-values))
+                  coin-values)))))
+#+END_SRC
+
+Define the procedures first-denomination, except-first-denomination, and no-more? in terms of
+primitive operations on list structures.
+
+#+BEGIN_SRC scheme :tangle 2.19.scm
+  (define (first-denomination l)
+    (car l))
+  (define (except-first-denomination l)
+    (cdr l))
+  (define (no-more? l)
+    (null? l))
+#+END_SRC
+
+The order doesn't affect the answer.
+
+*** Exercise 2.20
+
+Use the dotted-tail notation to write a procedure same-parity.
+
+#+BEGIN_SRC scheme :tangle 2.20.scm
+  (define (same-parity . l)
+    (define (even? n)
+      (= (remainder n 2) 0))
+    (define parity (even? (car l)))
+    (define (iter list result)
+      (if (null? list)
+          (reverse result)
+          (iter (cdr list)
+                (if (equal? (even? (car list)) parity)
+                    (cons (car list) result)
+                    result))))
+    (iter (cdr l) (list (car l))))
+#+END_SRC
+
+*** Exercise 2.21
+
+Complete the square-list method:
+
+#+BEGIN_SRC scheme :tangle 2.21.scm
+(define nil '())
+(define (square-list items)
+  (if (null? items)
+      nil
+      (cons (square (car items)) (square-list (cdr items)))))
+(define (square-list items)
+  (map square items))
+#+END_SRC
+
+*** Exercise 2.22
+
+Louis's procedure cons each new value in front of the answers, resulting
+in a reversed construction.
+Louis's second attempt doesn't work either because cons can only prepend
+to an existing list.
+
+*** Exercise 2.23
+
+Give an implementation of for-each.
+
+#+BEGIN_SRC scheme :tangle 2.23.scm
+  (define (for-each f l)
+    (cond ((not (null? l))
+           (f (car l))
+           (for-each f (cdr l)))))
+#+END_SRC
+
+Note: unlike emacs-lisp, if doesn't allow multiple else statements.
+
+*** Exercise 2.24
+
+Represent (list 1 (list 2 (list 3 4)))
+
+mit-scheme represents as:
+#+BEGIN_SRC scheme
+;Value: (1 (2 (3 4)))
+#+END_SRC
+
+box and pointer:
+#+BEGIN_SRC text
+[*|*]-[*|/]
+|     |
+1     [*|*]-[*|/]
+      |     |
+      2     [*|*]-[*|/]
+            |     |
+            3     4
+#+END_SRC
+
+tree
+#+BEGIN_SRC text
+      (1 (2 (3 4)))
+          / \
+         /   \(2 (3 4))
+        1    /\
+            /  \(3 4)
+           2   /\
+              /  \
+             3    4
+#+END_SRC
+
+*** Exercise 2.25
+
+Give combinations of cars and cdrs that will pick 7 from each of the following lists:
+
+#+BEGIN_SRC scheme
+(define l1 (list 1 3 (list 5 7) 9))
+(car (cdr (car (cdr (cdr l1)))))
+
+(define l2 (list (list 7)))
+(car (car l2))
+
+(define l3 (list 1 (list 2 (list 3 (list 4 (list 5 (list 6 7)))))))
+(car (cdr (car (cdr (car (cdr (car (cdr (car (cdr (car (cdr l3))))))))))))
+#+END_SRC
+
+*** Exercise 2.26
+
+Suppose we define x and y to be two lists:
+
+#+BEGIN_SRC scheme
+(define x (list 1 2 3))
+(define y (list 4 5 6))
+#+END_SRC
+
+What result is printed by the interpreter in response to evaluating each of the following expressions:
+
+- (append x y) : append would concat the two lists
+
+- (cons x y) : cons would create a list with the first element being the list x, the rest being the list y
+
+- (list x y) : list would create a list of x and y
+
+*** Exercise 2.27
+
+Define a deep-reverse procedure:
+
+#+BEGIN_SRC scheme
+  (define (deep-reverse l)
+    (define (iter l r)
+      (if (null? l)
+          r
+          (let ((c (car l)))
+            (iter (cdr l)
+                  (cons (if (pair? c)
+                            (deep-reverse c)
+                            c)
+                        r)))))
+      (iter l '()))
+#+END_SRC
+
+*** Exercise 2.28
+
+Define a fringe procedure:
+
+#+BEGIN_SRC scheme :tangle 2.28.scm
+  (define (fringe l)
+    (define (iter l r)
+      (cond ((null? l) r)
+            ((not (pair? l)) (cons l r))
+            (else (iter (car l) (iter (cdr l) r)))))
+    (iter l '()))
+#+END_SRC
+
+*** Exercise 2.29
+
+Given
+
+#+BEGIN_SRC scheme
+(define (make-mobile left right)
+  (list left right))
+(define (make-branch length structure)
+  (list length structure))
+#+END_SRC
+
+Write the corresponding selectors left-branch and right-branch,
+which return the branches of a mobile, and
+branch-length and branch-structure, which return the components of a branch.
+
+#+BEGIN_SRC scheme :tangle 2.29.scm
+(define (left-branch mobile) (car mobile))
+(define (right-branch mobile) (car (cdr mobile)))
+(define (branch-length branch) (car branch))
+(define (branch-structure branch) (car (cdr branch)))
+#+END_SRC
+
+Define a procedure total-weight that returns the total weight of a mobile.
+
+#+BEGIN_SRC scheme :tangle 2.29.scm
+(define (total-weight mobile)
+  (cond ((not (pair? mobile)) mobile)
+        (else (+ (total-weight (branch-structure (left-branch mobile)))
+                 (total-weight (branch-structure (right-branch mobile)))))))
+#+END_SRC
+
+Define a balanced? procedure.
+
+#+BEGIN_SRC scheme :tangle 2.29.scm
+(define (balanced? mobile)
+   (define (branch-torque branch)
+     (* (branch-length branch) (total-weight (branch-structure branch))))
+   (= (branch-torque (left-branch mobile))
+      (branch-torque (right-branch mobile))))
+#+END_SRC
+
+Note: the author doesn't mentioned each sub branch has to be balanced.
+
+If we changed the implementation of mobile and branch to use cons instead of list,
+then only the selected needs to be updated.
+
+*** Exercise 2.30
+
+Define a procedure square-tree analogous to the square-list:
+
+#+BEGIN_SRC scheme :tangle 2.30.scm
+(define (square-tree tree)
+  (cond ((null? tree) nil)
+        ((not (pair? tree)) (square tree))
+        (else (cons (square-tree (car tree))
+                    (square-tree (cdr tree))))))
+
+(define (square-tree-with-map tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (square-tree-with-map sub-tree)
+             (square sub-tree)))
+       tree))
+#+END_SRC
+
+*** Exercise 2.31
+
+Define a procedure tree-map:
+
+#+BEGIN_SRC scheme :tangle 2.31.scm
+(define (tree-map proc tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (tree-map proc sub-tree)
+             (proc sub-tree)))
+       tree))
+#+END_SRC
+
+*** Exercise 2.32
+
+Define a subsets procedure, given (1 2 3) returns
+(() (3) (2) (2 3) (1) (1 3) (1 2) (1 2 3)):
+
+#+BEGIN_SRC scheme
+(define (subsets s)
+  (if (null? s)
+      (list nil)
+      (let ((rest (subsets (cdr s))))
+        (append rest (map subsets-map rest)))))
+#+END_SRC
+
+Using evaluation method we observe that we need:
+#+BEGIN_SRC txt
+(subsets (1 2 3))
+  rest (subset (2 3))
+    rest (subset (3))
+      rest (subset ())
+       <- nil
+    <- (nil (3))
+  <- (nil (3) (2) (2 3))
+<- (nil (3) (2) (2 3) (1) (1 3) (1 2) (1 2 3))
+#+END_SRC
+
+Thus the subsets-map function needs to take the first element of the list and combined it with each element of the rest:
+
+#+BEGIN_SRC scheme :tangle 2.32.scm
+(define (subsets s)
+  (if (null? s)
+      (list '())
+      (let ((rest (subsets (cdr s))))
+        (append rest (map (lambda (x) (cons (car s) x)) rest)))))
+#+END_SRC
