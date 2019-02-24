@@ -895,3 +895,147 @@ class EvaluateSICP(EvaluateScheme):
         r = self.eval_value(f, str)
         if r != "(() (3) #0=(2) #1=(2 3) (1) (1 3) (1 . #0#) (1 . #1#))":
             return "%s is not the correct answer for %s" % (r, f)
+
+    seq_common = """
+(define nil '())
+(define (filter predicate sequence)
+  (cond ((null? sequence) nil)
+        ((predicate (car sequence))
+         (cons (car sequence)
+               (filter predicate (cdr sequence))))
+        (else (filter predicate (cdr sequence)))))
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
+(define (flatmap proc seq)
+  (accumulate append nil (map proc seq)))
+(define (enumerate-interval low high)
+  (if (> low high)
+      nil
+      (cons low (enumerate-interval (+ low 1) high))))
+"""
+
+    def eval_2_33(self, fpath):
+        self.load(self.seq_common)
+        self.load(fpath)
+        errors = []
+        f = "(map square (list 1 2 3))"
+        r = self.eval_value(f, list)
+        if r != [1, 4, 9]:
+            errors.append("%s is not the correct answer for %s" % (r, f))
+        f = "(append (list 1 2) (list 3 4))"
+        r = self.eval_value(f, list)
+        if r != [1, 2, 3, 4]:
+            errors.append("%s is not the correct answer for %s" % (r, f))
+        f = "(length (list 1 2 3 4))"
+        r = self.eval_value(f, int)
+        if r != 4:
+            errors.append("%s is not the correct answer for %s" % (r, f))
+        return ", ".join(errors)
+
+    def eval_2_34(self, fpath):
+        self.load(self.seq_common)
+        self.load(fpath)
+        f = "(horner-eval 2 (list 1 3 0 5 0 1))"
+        r = self.eval_value(f, int)
+        if r != 79:
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_35(self, fpath):
+        self.load(self.seq_common)
+        self.load(fpath)
+        f = "(count-leaves (list 1 (list 2 (list 3 4) 5) (list 6 7)))"
+        r = self.eval_value(f, int)
+        if r != 7:
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_36(self, fpath):
+        self.load(self.seq_common)
+        self.load(fpath)
+        f = "(accumulate-n + 0 (list (list 1 2 3) (list 4 5 6) (list 7 8 9)))"
+        r = self.eval_value(f, list)
+        if r != [12, 15, 18]:
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_37(self, fpath):
+        self.load(self.seq_common)
+        self.load("""
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      nil
+      (cons (accumulate op init (map (lambda (x) (car x)) seqs))
+            (accumulate-n op init (map (lambda (x) (cdr x)) seqs)))))
+""")
+        self.load(fpath)
+        m = "(list '(1 2 3 4) '(4 5 6 6) '(6 7 8 9))"
+        v = "'(3 4 5 6)"
+        errors = []
+        f = "(matrix-*-vector %s %s)" % (m, v)
+        r = self.eval_value(f, list)
+        if r != [50, 98, 140]:
+            errors.append("%s is not the correct answer for %s" % (r, f))
+        f = "(transpose %s)" % m
+        r = self.eval_value(f, str)
+        if r != "((1 4 6) (2 5 7) (3 6 8) (4 6 9))":
+            errors.append("%s is not the correct answer for %s" % (r, f))
+        m = "(list '(1 2 3) '(4 5 6) '(7 8 9))"
+        f = "(matrix-*-matrix %s %s)" % (m, m)
+        r = self.eval_value(f, str)
+        if r != "((30 36 42) (66 81 96) (102 126 150))":
+            errors.append("%s is not the correct answer for %s" % (r, f))
+        return ", ".join(errors)
+
+    def eval_2_39(self, fpath):
+        self.load(self.seq_common)
+        self.load("""
+(define fold-right accumulate)
+(define (fold-left op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+        result
+        (iter (op result (car rest))
+              (cdr rest))))
+  (iter initial sequence))
+""")
+        f = "(reverse (list 1 2 3 4))"
+        r = self.eval_value(f, list)
+        if r != [4, 3, 2, 1]:
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_40(self, fpath):
+        self.load(self.seq_common)
+        self.load("""
+(define (smallest-divisor n)
+  (define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+          ((divides? test-divisor n) test-divisor)
+          (else (find-divisor n (+ test-divisor 1)))))
+  (define (divides? a b)
+    (= (remainder b a) 0))
+  (find-divisor n 2))
+(define (prime? n)
+  (= n (smallest-divisor n)))
+(define (prime-sum? pair)
+  (prime? (+ (car pair) (cadr pair))))
+(define (make-pair-sum pair)
+  (list (car pair) (cadr pair) (+ (car pair) (cadr pair))))
+""")
+        self.load(fpath)
+        f = "(unique-pairs 3)"
+        r = self.eval_value(f, str)
+        if r != "((2 1) (3 1) (3 2))":
+            return "%s is not the correct answer for %s" % (r, f)
+        f = "(prime-sum-pairs 3)"
+        r = self.eval_value(f, str)
+        if r != "((2 1 3) (3 2 5))":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_41(self, fpath):
+        self.load(self.seq_common)
+        self.load(fpath)
+        f = "(ord-triples-sum 16 42)"
+        r = self.eval_value(f, str)
+        if r != "((15 14 13) (16 14 12) (16 15 11))":
+            return "%s is not the correct answer for %s" % (r, f)

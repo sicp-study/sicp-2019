@@ -86,39 +86,44 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 ## Chapter 2
 
 
-### 2.1.1 & 2.1.2 & 2.1.3 (Introduction to Data Abstraction)
+### DONE 2.1.1 & 2.1.2 & 2.1.3 (Introduction to Data Abstraction)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-02-01 Fri&gt;</span></span></p>
 
-[lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2b.mp4)
+[lecture-2b](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec2b.mp4)
 
 -   For exercise 2.3, name the procedures (make-rectangle point1 point2), perimeter-rectangle and area-rectangle.
 
 
-### 2.1.4 (Interval Arithmetic)
+### DONE 2.1.4 (Interval Arithmetic)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-02-08 Fri&gt;</span></span></p>
 
-[lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4)
 
-
-### 2.2.1 & 2.2.2 (Hierarchical Structures)
+### DONE 2.2.1 & 2.2.2 (Hierarchical Data and the Closure Property)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-02-15 Fri&gt;</span></span></p>
 
-[lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4)
+[lecture 3a (first half)](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4)
+
+-   For exercise 2.29, assume a list based implementation of mobile and branch
+-   For exercise 2.30, name the functions square-tree and square-tree-with-map
 
 
-### 2.2.3 (Sequences as Conventional Interfaces)
+### DONE 2.2.3 (Sequences as Conventional Interfaces)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-02-22 Fri&gt;</span></span></p>
+
+-   For exercise 2.41, name the procedure (ord-triples-sum n s)
 
 
 ### 2.2.4 (A Picture Language)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-01 Fri&gt;</span></span></p>
 
-[lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4)
+[lecture 3a (second half)](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4)
+
+NEXT: [lecture-3b](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4) [lecture-4a](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4)
 
 
 ### 2.3.1 & 2.3.2 (Symbolic Differentiation)
