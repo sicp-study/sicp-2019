@@ -102,9 +102,10 @@ DEADLINE: <2019-02-15 Fri>
 - For exercise 2.29, assume a list based implementation of mobile and branch
 - For exercise 2.30, name the functions square-tree and square-tree-with-map
 
-*** 2.2.3 (Sequences as Conventional Interfaces)
+*** DONE 2.2.3 (Sequences as Conventional Interfaces)
 DEADLINE: <2019-02-22 Fri>
 
+- For exercise 2.41, name the procedure (ord-triples-sum n s)
 *** 2.2.4 (A Picture Language)
 DEADLINE: <2019-03-01 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4][lecture 3a (second half)]]
