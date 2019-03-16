@@ -160,6 +160,12 @@ class EvaluateScheme:
                 if ltype:
                     l = list(map(ltype, l))
                 return l
+            if vtype == bool:
+                if ret[1] == "#t":
+                    return True
+                elif ret[1] == "#f":
+                    return False
+                raise ValueError()
             return vtype(ret[1])
         except ValueError:
             raise RuntimeError("%s should have returned a %s (was %s)" % (
