@@ -1,0 +1,142 @@
+#+TITLE: SICP 2.3 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Symbolic Data
+*** Exercise 2.53
+
+Test to verify quote understanding
+#+BEGIN_SRC scheme
+; (a b c)
+; ((george))
+; ((y1 y2)) ; cdr returns the rest of a list, not the second element
+; (y1 y2)
+; #f
+; #f
+; (red shoes blue socks)
+#+END_SRC
+
+*** Exercise 2.54
+
+Define equal? for list
+#+BEGIN_SRC scheme :tangle 2.54.scm
+(define (equal? l1 l2)
+  (cond ((and (not (pair? l1)) (not (pair? l2)))
+         (eq? l1 l2))
+        ((and (pair? l1) (pair? l2))
+         (and (equal? (car l1) (car l2)) (equal? (cdr l1) (cdr l2))))
+        (else #f)))
+#+END_SRC
+
+*** Exercise 2.55
+
+#+BEGIN_SRC text
+''test evaluates to (quote test), which is a list.
+(car ''test) returns the first element of the list, which is quote.
+#+END_SRC
+
+*** Exercise 2.56
+
+Add a rule for exponent to the deriv procedure:
+
+#+BEGIN_SRC scheme :tangle 2.56.scm
+(define (exponentiation? x)
+  (and (pair? x) (eq? (car x) '**)))
+(define (base e) (cadr e))
+(define (exponent e) (caddr e))
+(define (make-exponentiation b e)
+  (cond ((=number? e 0) 1)
+        ((=number? e 1) b)
+        (else (list '** b e))))
+
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp)
+         (if (same-variable? exp var) 1 0))
+        ((sum? exp)
+         (make-sum (deriv (addend exp) var)
+                   (deriv (augend exp) var)))
+        ((product? exp)
+         (make-sum
+           (make-product (multiplier exp)
+                         (deriv (multiplicand exp) var))
+           (make-product (deriv (multiplier exp) var)
+                         (multiplicand exp))))
+        ((exponentiation? exp)
+          (make-product
+            (make-product (exponent exp)
+                          (make-exponentiation (base exp)
+                                               (make-sum (exponent exp) -1)))
+            (deriv (base exp) var)))
+        (else
+         (error "unknown expression type -- DERIV" exp))))
+#+END_SRC
+
+*** Exercise 2.57
+
+Add support for sum and product of arbritary numbers:
+
+#+BEGIN_SRC scheme :tangle 2.57.scm
+(define (augend s)
+  (let ((rest (cddr s)))
+    (if (eq? (cdr rest) '())
+        (car rest)
+        (make-sum (car rest) (augend (cons '+ rest))))))
+(define (multiplicand s)
+  (let ((rest (cddr s)))
+    (if (eq? (cdr rest) '())
+        (car rest)
+        (make-product (car rest) (multiplicand (cons '* rest))))))
+#+END_SRC
+
+*** Exercise 2.58
+
+Change reprensation to support infix notation:
+#+BEGIN_SRC scheme :tangle 2.58.scm
+(define (sum? x)
+  (and (pair? x) (eq? (cadr x) '+)))
+(define (addend s) (car s))
+(define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2)) (+ a1 a2))
+        (else (list a1 '+ a2))))
+
+(define (product? x)
+  (and (pair? x) (eq? (cadr x) '*)))
+(define (multiplicand s) (car s))
+(define (make-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (list m1 '* m2))))
+#+END_SRC
+
+Add support for operation precedence like: "(x + 3 * (x + y + 2))":
+
+#+BEGIN_SRC scheme :tangle 2.58.scm
+;; Deriv sum before product
+(define (sum? x) (pair? (memq '+ x)))
+(define (product? x) (not (sum? x)))
+
+(define (collect op x)
+  ;; returns elements before 'op
+  (define (iter x result)
+    (if (eq? (car x) op)
+      (reverse result)
+      (iter (cdr x) (cons (car x) result))))
+  (iter x '()))
+
+(define (unwrap x)
+  ;; returns elem if expression is only one elem
+  (if (= (length x) 1) (car x) x))
+
+;; Update selector to correctly split the expression
+(define (addend s) (unwrap (collect '+ s)))
+(define (augend s) (unwrap (cdr (memq '+ s))))
+(define (multiplier p) (unwrap (collect '* p)))
+(define (multiplicand p) (unwrap (cdr (memq '* p))))
+#+END_SRC
