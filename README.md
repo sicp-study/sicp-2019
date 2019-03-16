@@ -117,20 +117,20 @@ This is a weekly schedule adapted from this [meetup](https://github.com/CompSciC
 -   For exercise 2.41, name the procedure (ord-triples-sum n s)
 
 
-### 2.2.4 (A Picture Language)
+### DONE 2.2.4 (A Picture Language)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-01 Fri&gt;</span></span></p>
 
 [lecture 3a (second half)](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3a.mp4)
 
-NEXT: [lecture-3b](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4) [lecture-4a](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4)
+To use the picture language, you can use DrRacket and load this [library](https://gist.github.com/etscrivner/e0105d9f608b00943a49).
 
 
-### 2.3.1 & 2.3.2 (Symbolic Differentiation)
+### DONE 2.3.1 & 2.3.2 (Symbolic Differentiation)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-08 Fri&gt;</span></span></p>
 
-[lecture](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4)
+[lecture 3b](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4)
 
 
 ### 2.3.3 (Representing Sets)

@@ -112,7 +112,7 @@ DEADLINE: <2019-03-01 Fri>
 
 To use the picture language, you can use DrRacket and load this [[https://gist.github.com/etscrivner/e0105d9f608b00943a49][library]].
 
-*** 2.3.1 & 2.3.2 (Symbolic Differentiation)
+*** DONE 2.3.1 & 2.3.2 (Symbolic Differentiation)
 DEADLINE: <2019-03-08 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4][lecture 3b]]
 
