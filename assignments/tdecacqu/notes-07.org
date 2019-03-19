@@ -1,0 +1,196 @@
+#+TITLE: SICP 2.2.3 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Sequences as Conventional Interfaces
+Common procedure:
+#+BEGIN_SRC scheme
+(define nil '())
+(define (filter predicate sequence)
+  (cond ((null? sequence) nil)
+        ((predicate (car sequence))
+         (cons (car sequence)
+               (filter predicate (cdr sequence))))
+        (else (filter predicate (cdr sequence)))))
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
+(define (flatmap proc seq)
+  (accumulate append nil (map proc seq)))
+(define (enumerate-interval low high)
+  (if (> low high)
+      nil
+      (cons low (enumerate-interval (+ low 1) high))))
+#+END_SRC
+
+*** Exercise 2.33
+Use sequence/signal-based processing to implement the following procedure:
+
+#+BEGIN_SRC scheme :tangle 2.33.scm
+(define (map p sequence)
+  (accumulate (lambda (x y) (cons (p x) y)) nil sequence))
+(define (append seq1 seq2)
+  (accumulate cons seq2 seq1))
+(define (length sequence)
+  (accumulate (lambda (x y) (+ y 1)) 0 sequence))
+(append (list 1 2) (list 3 4))
+#+END_SRC
+
+*** Exercise 2.34
+Implement the Horner's rule:
+
+#+BEGIN_SRC scheme :tangle 2.34.scm
+(define (horner-eval x coefficient-sequence)
+  (accumulate (lambda (this-coeff higher-terms)
+                 (+ this-coeff (* x higher-terms)))
+              0
+              coefficient-sequence))
+#+END_SRC
+
+*** Exercise 2.35
+Redefine count-leaves from section 2.2.2 as an accumulation:
+
+#+BEGIN_SRC scheme :tangle 2.35.scm
+(define (count-leaves t)
+  (accumulate +
+              0
+              (map (lambda (x) (if (pair? x) (count-leaves x) 1))
+                   t)))
+#+END_SRC
+
+*** Exercise 2.36
+Define the accumulate-n procedure:
+
+#+BEGIN_SRC scheme :tangle 2.36.scm
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      nil
+      (cons (accumulate op init (map (lambda (x) (car x)) seqs))
+            (accumulate-n op init (map (lambda (x) (cdr x)) seqs)))))
+#+END_SRC
+
+*** Exercise 2.37
+procedures for computing the other matrix operations:
+
+#+BEGIN_SRC scheme :tangle 2.37.scm
+(define (matrix-*-vector m v)
+  (map (lambda (row) (accumulate + 0 (accumulate-n * 1 (list row v)))) m))
+(define (transpose mat)
+  (accumulate-n cons '() mat))
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map (lambda (row) (matrix-*-vector cols row)) m)))
+#+END_SRC
+
+*** Exercise 2.38
+Given:
+#+BEGIN_SRC scheme
+(define fold-right accumulate)
+(define (fold-left op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+        result
+        (iter (op result (car rest))
+              (cdr rest))))
+  (iter initial sequence))
+#+END_SRC
+
+Those processes result in:
+#+BEGIN_SRC scheme
+(fold-right / 1 (list 1 2 3))
+; 3 / 2 / 1 = 3/2
+(fold-left / 1 (list 1 2 3))
+; 1 / 2 / 3 = 1/6
+(fold-right list nil (list 1 2 3))
+; (1 (2 (3 ())))
+(fold-left list nil (list 1 2 3))
+; (((() 1) 2) 3)
+#+END_SRC
+
+If op is commutative, then fold-left and fold-right produces the same result.
+
+*** Exercise 2.39
+Implement reverse using fold procedures:
+#+BEGIN_SRC scheme :tangle 2.39.scm
+(define (reverse sequence)
+  (fold-right (lambda (x y) (append y (list x))) nil sequence))
+(define (reverse sequence)
+  (fold-left (lambda (x y) (cons y x)) nil sequence))
+#+END_SRC
+
+*** Exercise 2.40
+Define a procedure unique-pairs:
+#+BEGIN_SRC scheme :tangle 2.40.scm
+  (define (unique-pairs n)
+    (flatmap (lambda (i) (map (lambda (j) (list i j))
+                         (enumerate-interval 1 (- i 1))))
+             (enumerate-interval 1 n)))
+#+END_SRC
+And simplify the the definition of prime-sum-pairs:
+
+#+BEGIN_SRC scheme :tangle 2.40.scm
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum?
+               (unique-pairs n))))
+#+END_SRC
+
+*** Exercise 2.41
+Write a procedure to find all ordered triples of distinct positive integers
+i, j, and k less than or equal to a given integer n that sum to a given integer s:
+#+BEGIN_SRC scheme :tangle 2.41.scm
+(define (ord-triples-sum n s)
+  (define (unique-triples n)
+    (flatmap (lambda (i) (flatmap (lambda (j) (map (lambda (k) (list i j k))
+                                         (enumerate-interval 1 (- j 1))))
+                         (enumerate-interval 1 (- i 1))))
+             (enumerate-interval 1 n)))
+  (filter (lambda (l) (= (+ (car l) (car (cdr l)) (car (cdr (cdr l)))) s))
+          (unique-triples n)))
+#+END_SRC
+
+*** Exercise 2.42
+Given:
+#+BEGIN_SRC scheme :tangle 2.42.scm
+(define (queens board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (list empty-board)
+        (filter
+         (lambda (positions) (safe? k positions))
+         (flatmap
+          (lambda (rest-of-queens)
+            (map (lambda (new-row)
+                   (adjoin-position new-row k rest-of-queens))
+                 (enumerate-interval 1 board-size)))
+          (queen-cols (- k 1))))))
+  (queen-cols board-size))
+#+END_SRC
+
+Complete the program:
+#+BEGIN_SRC scheme :tangle 2.42.scm
+(define empty-board nil)
+(define (adjoin-position new-row k rest-of-queens)
+  ;; Store each positions (row column) as direct cons
+  (cons (cons new-row k) rest-of-queens))
+(define (safe? k rest-of-queens)
+  (define (conflicts new against)
+    (filter (lambda (other)
+                   ;; same row
+               (or (= (car new) (car other))
+                   ;; same diag
+                   (= (abs (- (car new) (car other)))
+                      (abs (- (cdr new) (cdr other))))))
+            against))
+  (null? (conflicts (car rest-of-queens) (cdr rest-of-queens))))
+#+END_SRC
+
+*** Exercise 2.43
+
+Louis implementation evaluate queen-cols for possible position instead of only
+once resulting in a time complexicity of N**N.
+Thus tt will takes 8**8 * T to solve a board of size 8.
