@@ -116,9 +116,10 @@ To use the picture language, you can use DrRacket and load this [[https://gist.g
 DEADLINE: <2019-03-08 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4][lecture 3b]]
 
-*** 2.3.3 (Representing Sets)
+*** DONE 2.3.3 (Representing Sets)
 DEADLINE: <2019-03-15 Fri>
 
+- For exercise 2.65, name the procedure union-set-tree and intersection-set-tree
 *** 2.3.4 (Huffman Encoding)
 DEADLINE: <2019-03-22 Fri>
 
