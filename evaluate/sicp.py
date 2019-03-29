@@ -1137,3 +1137,143 @@ class EvaluateSICP(EvaluateScheme):
             if r != res:
                 errors.append("%s is not the correct answer for %s" % (r, f))
         return ", ".join(errors)
+
+    set_unordered_common = """
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+        ((equal? x (car set)) true)
+        (else (element-of-set? x (cdr set)))))
+(define (adjoin-set x set)
+  (if (element-of-set? x set)
+      set
+      (cons x set)))
+(define (intersection-set set1 set2)
+  (cond ((or (null? set1) (null? set2)) '())
+        ((element-of-set? (car set1) set2)
+         (cons (car set1)
+               (intersection-set (cdr set1) set2)))
+        (else (intersection-set (cdr set1) set2))))
+"""
+
+    def eval_2_59(self, fpath):
+        self.load(self.set_unordered_common)
+        self.load(fpath)
+        errors = []
+        for s1, s2 in [(set(), set()), (set(), {1, 2}), ({1, 2}, set()),
+                       ({1, 2, 3}, {2, 3, 4})]:
+            f = "(union-set (list %s) (list %s))" % (
+                " ".join(map(str, s1)), " ".join(map(str, s2)))
+            r = set(self.eval_value(f, list))
+            if r != s1.union(s2):
+                errors.append("%s is not the correct answer for %s" % (r, f))
+        return ", ".join(errors)
+
+    def eval_2_62(self, fpath):
+        self.load(fpath)
+        errors = []
+        for s1, s2 in [([], []), ([], [1, 2]), ([1, 2, 4], [1, 2, 3])]:
+            for t1, t2 in ((s1, s2), (s2, s1)):
+                f = "(union-set (list %s) (list %s))" % (
+                    " ".join(map(str, s1)), " ".join(map(str, s2)))
+                r = self.eval_value(f, list)
+                l = sorted(list(set(s1).union(set(s2))))
+                if r != l:
+                    errors.append(
+                        "%s is not the correct answer for %s" % (r, f))
+        return ", ".join(errors)
+
+    set_tree_common = """
+(define (entry tree) (car tree))
+(define (left-branch tree) (cadr tree))
+(define (right-branch tree) (caddr tree))
+(define (make-tree entry left right)
+  (list entry left right))
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+        ((= x (entry set)) true)
+        ((< x (entry set))
+         (element-of-set? x (left-branch set)))
+        ((> x (entry set))
+         (element-of-set? x (right-branch set)))))
+(define (adjoin-set x set)
+  (cond ((null? set) (make-tree x '() '()))
+        ((= x (entry set)) set)
+        ((< x (entry set))
+         (make-tree (entry set)
+                    (adjoin-set x (left-branch set))
+                    (right-branch set)))
+        ((> x (entry set))
+         (make-tree (entry set)
+                    (left-branch set)
+                    (adjoin-set x (right-branch set))))))
+(define (tree->list tree)
+  (define (copy-to-list tree result-list)
+    (if (null? tree)
+        result-list
+        (copy-to-list (left-branch tree)
+                      (cons (entry tree)
+                            (copy-to-list (right-branch tree)
+                                          result-list)))))
+  (copy-to-list tree '()))
+(define (list->tree elements)
+  (car (partial-tree elements (length elements))))
+
+(define (partial-tree elts n)
+  (if (= n 0)
+      (cons '() elts)
+      (let ((left-size (quotient (- n 1) 2)))
+        (let ((left-result (partial-tree elts left-size)))
+          (let ((left-tree (car left-result))
+                (non-left-elts (cdr left-result))
+                (right-size (- n (+ left-size 1))))
+            (let ((this-entry (car non-left-elts))
+                  (right-result (partial-tree (cdr non-left-elts)
+                                              right-size)))
+              (let ((right-tree (car right-result))
+                    (remaining-elts (cdr right-result)))
+                (cons (make-tree this-entry left-tree right-tree)
+                      remaining-elts))))))))
+(define (union-set set1 set2)
+  (cond ((null? set1) set2)
+        ((null? set2) set1)
+        (else (let ((x (car set1)) (y (car set2)))
+          (cond ((= x y) (cons x (union-set (cdr set1) (cdr set2))))
+                ((< x y) (cons x (union-set (cdr set1) set2)))
+                (else (cons y (union-set set1 (cdr set2)))))))))
+(define (intersection-set set1 set2)
+  (if (or (null? set1) (null? set2))
+      '()
+      (let ((x1 (car set1)) (x2 (car set2)))
+        (cond ((= x1 x2)
+               (cons x1
+                     (intersection-set (cdr set1)
+                                       (cdr set2))))
+              ((< x1 x2)
+               (intersection-set (cdr set1) set2))
+              ((< x2 x1)
+               (intersection-set set1 (cdr set2)))))))
+"""
+
+    def eval_2_65(self, fpath):
+        self.load(self.set_tree_common)
+        self.load(fpath)
+        errors = []
+        for s1, s2 in [([], []), ([], [1, 2]), ([1, 2, 4], [1, 2, 3])]:
+            for t1, t2 in ((s1, s2), (s2, s1)):
+                f = ("(tree->list (union-set-tree "
+                     "(list->tree '(%s)) (list->tree '(%s))))" % (
+                         " ".join(map(str, s1)), " ".join(map(str, s2))))
+                r = self.eval_value(f, list)
+                l = sorted(list(set(s1).union(set(s2))))
+                if r != l:
+                    errors.append(
+                        "%s is not the correct answer for %s" % (r, f))
+                f = ("(tree->list (intersection-set-tree "
+                     "(list->tree '(%s)) (list->tree '(%s))))" % (
+                         " ".join(map(str, s1)), " ".join(map(str, s2))))
+                r = self.eval_value(f, list)
+                l = sorted(list(set(s1).intersection(set(s2))))
+                if r != l:
+                    errors.append(
+                        "%s is not the correct answer for %s" % (r, f))
+                return ", ".join(errors)
