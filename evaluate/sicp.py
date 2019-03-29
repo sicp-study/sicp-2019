@@ -1277,3 +1277,30 @@ class EvaluateSICP(EvaluateScheme):
                     errors.append(
                         "%s is not the correct answer for %s" % (r, f))
                 return ", ".join(errors)
+
+    def eval_2_66(self, fpath):
+        self.load("""
+(define (entry tree) (car tree))
+(define (left-branch tree) (cadr tree))
+(define (right-branch tree) (caddr tree))
+(define (make-tree entry left right)
+  (list entry left right))
+(define (make-item key value) (cons key value))
+(define (key entry) (car entry))
+(define (value entry) (cdr entry))
+(define tree (make-tree (make-item 7 'g)
+                         (make-tree (make-item 3 'c)
+                                    (make-tree (make-item 1 'a) '() '())
+                                    (make-tree (make-item 5 'e) '() '()))
+                         (make-tree (make-item 9 'i) '()
+                                    (make-tree (make-item 11 'k) '() '()))))
+""")
+        self.load(fpath)
+        errors = []
+        for k, v in ([7, "g"], [5, "e"], [11, "k"]):
+            f = "(lookup %s tree)" % k
+            r = self.eval_value(f, str)
+            if r != "(%s . %s)" % (k, v):
+                errors.append(
+                    "%s is not the correct answer for %s" % (r, f))
+        return ", ".join(errors)
