@@ -120,7 +120,7 @@ DEADLINE: <2019-03-08 Fri>
 DEADLINE: <2019-03-15 Fri>
 
 - For exercise 2.65, name the procedure union-set-tree and intersection-set-tree
-*** 2.3.4 (Huffman Encoding)
+*** DONE 2.3.4 (Huffman Encoding)
 DEADLINE: <2019-03-22 Fri>
 
 *** 2.4 (Data Representations)
