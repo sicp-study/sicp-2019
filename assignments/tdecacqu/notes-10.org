@@ -1,0 +1,101 @@
+#+TITLE: SICP 2.3.3 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Symbolic Data
+*** Exercise 2.59
+Implement the union-set operation for the unordered-list representation of sets:
+
+#+BEGIN_SRC scheme :tangle 2.59.scm
+  (define (union-set set1 set2)
+    (define (iter set result)
+      (if (null? set)
+          result
+          (iter (cdr set) (if (element-of-set? (car set) result)
+                              result
+                              (cons (car set) result)))))
+    (iter set1 set2))
+#+END_SRC
+
+*** Exercise 2.60
+Design procedures element-of-set?, adjoin-set, union-set, and intersection-set that
+operate on representation allowing duplicate:
+
+#+BEGIN_SRC scheme :tangle 2.60.scm
+; element-of-set? and intersection-set are unchanged
+(define (adjoin-set x set)
+  (cons x set))
+
+(define (union-set set1 set2)
+  (append set1 set2))
+#+END_SRC
+
+This implementation enable fasters adjoin and union procedure O(1).
+
+*** Exercise 2.61
+Give an implementation of adjoin-set using the ordered representation:
+#+BEGIN_SRC scheme :tangle 2.61.scm
+(define (adjoin-set x set)
+   (cond ((null? set) (cons x '()))
+         ((= x (car set)) set)
+         ((< x (car set)) (cons x set))
+         (else (cons (car set) (adjoin-set x (cdr set))))))
+#+END_SRC
+
+*** Exercise 2.62
+Give a O(n) implementation of union-set for sets represented as ordered lists.
+
+#+BEGIN_SRC scheme :tangle 2.62.scm
+  (define (union-set set1 set2)
+    (cond ((null? set1) set2)
+          ((null? set2) set1)
+          (else (let ((x (car set1)) (y (car set2)))
+            (cond ((= x y) (cons x (union-set (cdr set1) (cdr set2))))
+                  ((< x y) (cons x (union-set (cdr set1) set2)))
+                  (else (cons y (union-set set1 (cdr set2)))))))))
+#+END_SRC
+
+*** Exercise 2.63
+a) Both procedures produce the same results as they walk the tree in order.
+b) The second procedure should grow slower because it doesn't use append.
+
+*** Exercise 2.64
+a) Partial-tree is a recursive process that builds the left branch first using half of the list.
+   Then it builds the right branch using the remaining element.
+
+#+BEGIN_SRC text
+(list->tree '(1 3 5 7 9 11))
+          5
+        /   \
+       1     9
+        \   / \
+         3  7  11
+#+END_SRC
+
+b) Partial-tree is evaluated once per elements, thus the growth is O(n)
+
+*** Exercise 2.65
+Give O(n) implementations of union-set and intersection-set:
+#+BEGIN_SRC scheme :tangle 2.65.scm
+  (define (union-set-tree set1 set2)
+    (list->tree (union-set (tree->list set1) (tree->list set2))))
+  (define (intersection-set-tree set1 set2)
+    (list->tree (intersection-set (tree->list set1) (tree->list set2))))
+#+END_SRC
+
+*** Exercise 2.66
+Implement the lookup procedure for the case where the set of records is
+structured as a binary tree:
+#+BEGIN_SRC scheme :tangle 2.66.scm
+  (define (lookup given-key set-of-records)
+    (cond ((null? set-of-records)
+           false)
+          ((equal? given-key (key (entry set-of-records)))
+           (entry set-of-records))
+          ((< given-key (key (entry set-of-records)))
+           (lookup given-key (left-branch set-of-records)))
+          ((> given-key (key (entry set-of-records)))
+           (lookup given-key (right-branch set-of-records)))))
+#+END_SRC
