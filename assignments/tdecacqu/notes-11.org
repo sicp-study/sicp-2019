@@ -1,0 +1,78 @@
+#+TITLE: SICP 2.3.4 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Symbolic Data
+*** Exercise 2.67
+Use the decode procedure to decode the message, and give the result:
+#+BEGIN_SRC scheme
+(decode sample-message sample-tree)
+;Value: (a d a b b c a)
+#+END_SRC
+
+*** Exercise 2.68
+Implement the encode-symbol procedure:
+#+BEGIN_SRC scheme :tangle 2.68.scm
+(define (encode-symbol symbol tree)
+  (define (element-of-set? x set)
+    (cond ((null? set) false)
+          ((equal? x (car set)) true)
+          (else (element-of-set? x (cdr set)))))
+
+  (define (iter branch result)
+    (cond ((leaf? branch)
+           (if (eq? symbol (symbol-leaf branch))
+               (reverse result)
+               (error "symbol not found: " symbol)))
+          ((element-of-set? symbol (symbols (right-branch branch)))
+           (iter (right-branch branch) (cons 1 result)))
+          ((element-of-set? symbol (symbols (left-branch branch)))
+           (iter (left-branch branch) (cons 0 result)))
+          (else (error "symbol not found: " symbol))))
+  (iter tree '()))
+#+END_SRC
+*** Exercise 2.69
+Implement the successive-merge procedure:
+#+BEGIN_SRC scheme :tangle 2.69.scm
+(define (successive-merge leaf-set)
+  (if (null? (cdr leaf-set))
+      (car leaf-set)
+      (successive-merge
+         (adjoin-set
+            (make-code-tree (car leaf-set) (cadr leaf-set))
+            (cddr leaf-set)))))
+#+END_SRC
+
+*** Exercise 2.70
+Encode lyrics of 50s rock songs:
+#+BEGIN_SRC scheme
+(define rock-tree (generate-huffman-tree
+  '((A 2) (NA 16) (BOOM 1) (SHA 3) (GET 2) (YIP 9) (JOB 2) (WAH 1))))
+(define chorus '(Get a job Sha na na na na na na na na))
+(define lyrics (append chorus chorus
+  '(Wah yip yip yip yip yip yip yip yip Sha Boom)))
+(length (encode lyrics rock-tree))
+;; 82 bits to encode the lyrics
+
+(* (length lyrics) 3)
+;; 105 bits for a fixed length encoding (3 bits for 8 symbols)
+#+END_SRC
+
+*** Exercise 2.71
+Sketch an exponential tree for n=5:
+#+BEGIN_SRC text
+      .
+     / \
+    e / \
+     d / \
+      c / \
+       b   a
+#+END_SRC
+The most frequent symbol needs 1 bit, the least frequent needs n-1.
+
+*** Exercise 2.72
+The encode-symbol procedure of exercise 2.68 search for the symbol in each node.
+Best case is when the symbol is a leaf of left branch: O(n * log(n)).
+Worst case is when the symbol is a leaf of right branch: O(n * n).
