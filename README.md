@@ -133,12 +133,14 @@ To use the picture language, you can use DrRacket and load this [library](https:
 [lecture 3b](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4)
 
 
-### 2.3.3 (Representing Sets)
+### DONE 2.3.3 (Representing Sets)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-15 Fri&gt;</span></span></p>
 
+-   For exercise 2.65, name the procedure union-set-tree and intersection-set-tree
 
-### 2.3.4 (Huffman Encoding)
+
+### DONE 2.3.4 (Huffman Encoding)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-22 Fri&gt;</span></span></p>
 

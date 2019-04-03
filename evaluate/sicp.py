@@ -1304,3 +1304,147 @@ class EvaluateSICP(EvaluateScheme):
                 errors.append(
                     "%s is not the correct answer for %s" % (r, f))
         return ", ".join(errors)
+
+    common_huffman_tree = """
+
+(define (make-leaf symbol weight)
+  (list 'leaf symbol weight))
+(define (leaf? object)
+  (eq? (car object) 'leaf))
+(define (symbol-leaf x) (cadr x))
+(define (weight-leaf x) (caddr x))
+(define (make-code-tree left right)
+  (list left
+        right
+        (append (symbols left)
+                (symbols right))
+        (+ (weight left) (weight right))))
+
+(define (left-branch tree) (car tree))
+(define (right-branch tree) (cadr tree))
+
+(define (symbols tree)
+  (if (leaf? tree)
+      (list (symbol-leaf tree))
+      (caddr tree)))
+
+(define (weight tree)
+  (if (leaf? tree)
+      (weight-leaf tree)
+      (cadddr tree)))
+
+(define (decode bits tree)
+  (define (decode-1 bits current-branch)
+    (if (null? bits)
+        '()
+        (let ((next-branch
+               (choose-branch
+                (car bits)
+                current-branch)))
+          (if (leaf? next-branch)
+              (cons
+               (symbol-leaf next-branch)
+               (decode-1 (cdr bits) tree))
+              (decode-1 (cdr bits)
+                        next-branch)))))
+  (decode-1 bits tree))
+
+(define (choose-branch bit branch)
+  (cond ((= bit 0) (left-branch branch))
+        ((= bit 1) (right-branch branch))
+        (else (error "bad bit:
+               CHOOSE-BRANCH" bit))))
+
+(define (adjoin-set x set)
+  (cond ((null? set) (list x))
+        ((< (weight x) (weight (car set)))
+         (cons x set))
+        (else
+         (cons (car set)
+               (adjoin-set x (cdr set))))))
+
+(define (make-leaf-set pairs)
+  (if (null? pairs)
+      '()
+      (let ((pair (car pairs)))
+        (adjoin-set
+         (make-leaf (car pair)    ; symbol
+                    (cadr pair))  ; frequency
+         (make-leaf-set (cdr pairs))))))
+
+(define sample-tree
+  (make-code-tree
+   (make-leaf 'A 4)
+   (make-code-tree
+    (make-leaf 'B 2)
+    (make-code-tree
+     (make-leaf 'D 1)
+     (make-leaf 'C 1)))))
+
+(define sample-message
+  '(0 1 1 0 0 1 0 1 0 1 1 1 0))
+
+
+(define (encode message tree)
+  (if (null? message)
+      '()
+      (append
+       (encode-symbol (car message)
+                      tree)
+       (encode (cdr message) tree))))
+
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+        ((= x (entry set)) true)
+        ((< x (entry set))
+         (element-of-set?
+          x
+          (left-branch set)))
+        ((> x (entry set))
+         (element-of-set?
+          x
+          (right-branch set)))))
+
+"""
+
+    def eval_2_68(self, fpath):
+        self.load(self.common_huffman_tree)
+        self.load(fpath)
+        f = "(encode '(a d a b b c a) sample-tree)"
+        r = self.eval_value(f, str)
+        if r != "(0 1 1 0 0 1 0 1 0 1 1 1 0)":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_69(self, fpath):
+        self.load(self.common_huffman_tree)
+        self.load("""
+(define (encode-symbol symbol tree)
+  (define (element-of-set? x set)
+    (cond ((null? set) false)
+          ((equal? x (car set)) true)
+          (else (element-of-set? x (cdr set)))))
+
+  (define (iter branch result)
+    (cond ((leaf? branch)
+           (if (eq? symbol (symbol-leaf branch))
+               (reverse result)
+               (error "symbol not found: " symbol)))
+          ((element-of-set? symbol (symbols (right-branch branch)))
+           (iter (right-branch branch) (cons 1 result)))
+          ((element-of-set? symbol (symbols (left-branch branch)))
+           (iter (left-branch branch) (cons 0 result)))
+          (else (error "symbol not found: " symbol))))
+  (iter tree '()))
+
+(define (generate-huffman-tree pairs)
+  (successive-merge
+   (make-leaf-set pairs)))
+""")
+        self.load(fpath)
+        t = "(define test-tree " \
+            "(generate-huffman-tree '((S 4) (I 2) (C 1) (P 1))))"
+        self.eval(t)
+        f = "(decode (encode '(s i c p) test-tree) test-tree)"
+        r = self.eval_value(f, str)
+        if r != "(s i c p)":
+            return "%s is not the correct answer for %s %s" % (r, t, f)
