@@ -52,12 +52,14 @@ Encode lyrics of 50s rock songs:
   '((A 2) (NA 16) (BOOM 1) (SHA 3) (GET 2) (YIP 9) (JOB 2) (WAH 1))))
 (define chorus '(Get a job Sha na na na na na na na na))
 (define lyrics (append chorus chorus
-  '(Wah yip yip yip yip yip yip yip yip Sha Boom)))
+  '(Wah yip yip yip yip)
+  '(yip yip yip yip yip)
+  '(Sha Boom)))
 (length (encode lyrics rock-tree))
-;; 82 bits to encode the lyrics
+;; 84 bits to encode the lyrics
 
 (* (length lyrics) 3)
-;; 105 bits for a fixed length encoding (3 bits for 8 symbols)
+;; 108 bits for a fixed length encoding (3 bits for 8 symbols)
 #+END_SRC
 
 *** Exercise 2.71
@@ -74,5 +76,6 @@ The most frequent symbol needs 1 bit, the least frequent needs n-1.
 
 *** Exercise 2.72
 The encode-symbol procedure of exercise 2.68 search for the symbol in each node.
-Best case is when the symbol is a leaf of left branch: O(n * log(n)).
-Worst case is when the symbol is a leaf of right branch: O(n * n).
+Considering the tree of Exercise 2.71:
+Best case is when the symbol is a leaf of the first left branch: O(n).
+Worst case is when the symbol is a leaf of the right branch: O(n * n).
