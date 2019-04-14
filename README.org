@@ -115,19 +115,23 @@ To use the picture language, you can use DrRacket and load this [[https://gist.g
 *** DONE 2.3.1 & 2.3.2 (Symbolic Differentiation)
 DEADLINE: <2019-03-08 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4][lecture 3b]]
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4][lecture 4a]]
 
 *** DONE 2.3.3 (Representing Sets)
 DEADLINE: <2019-03-15 Fri>
 
 - For exercise 2.65, name the procedure union-set-tree and intersection-set-tree
+
 *** DONE 2.3.4 (Huffman Encoding)
 DEADLINE: <2019-03-22 Fri>
 
-*** 2.4 (Data Representations)
+*** DONE 2.4 (Data Representations)
 DEADLINE: <2019-03-29 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4][lecture 4b (first half)]]
 
 *** 2.5.1 & 2.5.2 (Generic Operations)
 DEADLINE: <2019-04-05 Fri>
+[[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4][lecture 4b (second half)]]
 
 *** 2.5.3 (Symbolic Algebra)
 DEADLINE: <2019-04-12 Fri>

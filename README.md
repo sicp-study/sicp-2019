@@ -130,7 +130,7 @@ To use the picture language, you can use DrRacket and load this [library](https:
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-08 Fri&gt;</span></span></p>
 
-[lecture 3b](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4)
+[lecture 3b](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec3b.mp4) [lecture 4a](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4a.mp4)
 
 
 ### DONE 2.3.3 (Representing Sets)
@@ -145,14 +145,18 @@ To use the picture language, you can use DrRacket and load this [library](https:
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-22 Fri&gt;</span></span></p>
 
 
-### 2.4 (Data Representations)
+### DONE 2.4 (Data Representations)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-03-29 Fri&gt;</span></span></p>
+
+[lecture 4b (first half)](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4)
 
 
 ### 2.5.1 & 2.5.2 (Generic Operations)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-04-05 Fri&gt;</span></span></p>
+
+[lecture 4b (second half)](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4)
 
 
 ### 2.5.3 (Symbolic Algebra)
