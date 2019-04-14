@@ -16,6 +16,7 @@
 """SPOILER ALERT: below are the solutions to the exercices..."""
 
 import math
+import os
 
 from scheme import EvaluateScheme
 
@@ -1448,3 +1449,320 @@ class EvaluateSICP(EvaluateScheme):
         r = self.eval_value(f, str)
         if r != "(s i c p)":
             return "%s is not the correct answer for %s %s" % (r, t, f)
+
+    generic_operations_common = """
+(define *op-table* (make-hash-table))
+
+(define (put op type proc)
+  (hash-table/put! *op-table* (list op type) proc))
+
+(define (get op type)
+  (hash-table/get *op-table* (list op type) #f))
+
+(define (put-coercion source-type target-type proc)
+  (put 'coercion (list source-type target-type) proc))
+
+(define (get-coercion source-type target-type)
+  (get 'coercion (list source-type target-type)))
+
+(define (attach-tag type-tag contents)
+  (cons type-tag contents))
+
+(define (type-tag datum)
+  (if (pair? datum)
+      (car datum)
+      (error "Bad tagged datum:
+              TYPE-TAG" datum)))
+
+(define (contents datum)
+  (if (pair? datum)
+      (cdr datum)
+      (error "Bad tagged datum:
+              CONTENTS" datum)))
+
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+          (apply proc (map contents args))
+          (error
+            "No method for these types:
+             APPLY-GENERIC"
+            (list op type-tags))))))
+
+(define (add x y) (apply-generic 'add x y))
+(define (sub x y) (apply-generic 'sub x y))
+(define (mul x y) (apply-generic 'mul x y))
+(define (div x y) (apply-generic 'div x y))
+
+(define (install-scheme-number-package)
+  (define (tag x)
+    (attach-tag 'scheme-number x))
+  (put 'add '(scheme-number scheme-number)
+       (lambda (x y) (tag (+ x y))))
+  (put 'sub '(scheme-number scheme-number)
+       (lambda (x y) (tag (- x y))))
+  (put 'mul '(scheme-number scheme-number)
+       (lambda (x y) (tag (* x y))))
+  (put 'div '(scheme-number scheme-number)
+       (lambda (x y) (tag (/ x y))))
+  (put 'make 'scheme-number
+       (lambda (x) (tag x)))
+  'done)
+(install-scheme-number-package)
+(define (make-scheme-number n)
+  ((get 'make 'scheme-number) n))
+
+(define (install-rational-package)
+  ;; internal procedures
+  (define (numer x) (car x))
+  (define (denom x) (cdr x))
+  (define (make-rat n d)
+    (let ((g (gcd n d)))
+      (cons (/ n g) (/ d g))))
+  (define (add-rat x y)
+    (make-rat (+ (* (numer x) (denom y))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
+  (define (sub-rat x y)
+    (make-rat (- (* (numer x) (denom y))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
+  (define (mul-rat x y)
+    (make-rat (* (numer x) (numer y))
+              (* (denom x) (denom y))))
+  (define (div-rat x y)
+    (make-rat (* (numer x) (denom y))
+              (* (denom x) (numer y))))
+  ;; interface to rest of the system
+  (define (tag x) (attach-tag 'rational x))
+  (put 'add '(rational rational)
+       (lambda (x y) (tag (add-rat x y))))
+  (put 'sub '(rational rational)
+       (lambda (x y) (tag (sub-rat x y))))
+  (put 'mul '(rational rational)
+       (lambda (x y) (tag (mul-rat x y))))
+  (put 'div '(rational rational)
+       (lambda (x y) (tag (div-rat x y))))
+  (put 'make 'rational
+       (lambda (n d) (tag (make-rat n d))))
+  'done)
+(install-rational-package)
+(define (make-rational n d)
+  ((get 'make 'rational) n d))
+
+(define (install-rectangular-package)
+  ;; internal procedures
+  (define (real-part z) (car z))
+  (define (imag-part z) (cdr z))
+  (define (make-from-real-imag x y)
+    (cons x y))
+  (define (magnitude z)
+    (sqrt (+ (square (real-part z))
+             (square (imag-part z)))))
+  (define (angle z)
+    (atan (imag-part z) (real-part z)))
+  (define (make-from-mag-ang r a)
+    (cons (* r (cos a)) (* r (sin a))))
+  ;; interface to the rest of the system
+  (define (tag x)
+    (attach-tag 'rectangular x))
+  (put 'real-part '(rectangular) real-part)
+  (put 'imag-part '(rectangular) imag-part)
+  (put 'magnitude '(rectangular) magnitude)
+  (put 'angle '(rectangular) angle)
+  (put 'make-from-real-imag 'rectangular
+       (lambda (x y)
+         (tag (make-from-real-imag x y))))
+  (put 'make-from-mag-ang 'rectangular
+       (lambda (r a)
+         (tag (make-from-mag-ang r a))))
+  'done)
+(install-rectangular-package)
+
+(define (install-complex-package)
+  ;; imported procedures from rectangular
+  ;; and polar packages
+  (define (make-from-real-imag x y)
+    ((get 'make-from-real-imag
+          'rectangular)
+     x y))
+  (define (make-from-mag-ang r a)
+    ((get 'make-from-mag-ang 'polar)
+     r a))
+  ;; internal procedures
+  (define (add-complex z1 z2)
+    (make-from-real-imag
+     (+ (real-part z1) (real-part z2))
+     (+ (imag-part z1) (imag-part z2))))
+  (define (sub-complex z1 z2)
+    (make-from-real-imag
+     (- (real-part z1) (real-part z2))
+     (- (imag-part z1) (imag-part z2))))
+  (define (mul-complex z1 z2)
+    (make-from-mag-ang
+     (* (magnitude z1) (magnitude z2))
+     (+ (angle z1) (angle z2))))
+  (define (div-complex z1 z2)
+    (make-from-mag-ang
+     (/ (magnitude z1) (magnitude z2))
+     (- (angle z1) (angle z2))))
+  ;; interface to rest of the system
+  (define (tag z) (attach-tag 'complex z))
+  (put 'add '(complex complex)
+       (lambda (z1 z2)
+         (tag (add-complex z1 z2))))
+  (put 'sub '(complex complex)
+       (lambda (z1 z2)
+         (tag (sub-complex z1 z2))))
+  (put 'mul '(complex complex)
+       (lambda (z1 z2)
+         (tag (mul-complex z1 z2))))
+  (put 'div '(complex complex)
+       (lambda (z1 z2)
+         (tag (div-complex z1 z2))))
+  (put 'make-from-real-imag 'complex
+       (lambda (x y)
+         (tag (make-from-real-imag x y))))
+  (put 'make-from-mag-ang 'complex
+       (lambda (r a)
+         (tag (make-from-mag-ang r a))))
+  (define (real-part z)
+    (apply-generic 'real-part z))
+  (define (imag-part z)
+    (apply-generic 'imag-part z))
+  (define (magnitude z)
+    (apply-generic 'magnitude z))
+  (define (angle z)
+    (apply-generic 'angle z))
+  (put 'real-part '(complex) real-part)
+  (put 'imag-part '(complex) imag-part)
+  (put 'magnitude '(complex) magnitude)
+  (put 'angle '(complex) angle)
+  'done)
+(install-complex-package)
+(define (make-complex-from-real-imag x y)
+  ((get 'make-from-real-imag 'complex) x y))
+(define (make-complex-from-mag-ang r a)
+  ((get 'make-from-mag-ang 'complex) r a))
+(define (real-part x)
+  ((get 'real-part '(complex)) x))
+(define (imag-part x)
+  ((get 'imag-part '(complex)) x))
+(define (make-real x)
+  (attach-tag 'real x))
+
+(define (attach-tag type-tag contents)
+  (if (eq? type-tag 'scheme-number)
+      contents
+      (cons type-tag contents)))
+(define (type-tag datum)
+  (cond ((number? datum) 'scheme-number)
+        ((pair? datum) (car datum))
+        (else (error "Bad tagged datum: TYPE-TAG" datum))))
+(define (contents datum)
+  (cond ((number? datum) datum)
+        ((pair? datum) (cdr datum))
+        (else (error "Bad tagged datum: CONTENTS" datum))))
+
+(define (numer x) (car x))
+(define (denom x) (cdr x))
+
+(define (scheme-number->complex n) (make-complex-from-real-imag (contents n) 0))
+(put-coercion 'scheme-number 'complex scheme-number->complex)
+
+"""
+
+    def eval_2_78(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(fpath)
+        f = "(add 40 2)"
+        r = self.eval_value(f, int)
+        if r != 42:
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_79(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(fpath)
+        o = "(make-rational (make-scheme-number 4) (make-scheme-number 2))"
+        f = "(equ? %s %s)" % (o, o)
+        r = self.eval_value(f, str)
+        if r != "#t":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_80(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(fpath)
+        f = "(=zero? (make-complex-from-real-imag 0 0))"
+        r = self.eval_value(f, str)
+        if r != "#t":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_82(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(fpath)
+        f = "(apply-generic 'add 1 (make-complex-from-real-imag 1 2))"
+        r = self.eval_value(f, str)
+        if r != "(complex rectangular 2 . 2)":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_83(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(fpath)
+        f = "(raise 42)"
+        r = self.eval_value(f, str)
+        if r != "(rational 42 . 1)":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    common_raise = """
+(put 'raise '(scheme-number) (lambda (x) (make-rational x 1)))
+(put 'raise '(rational) (lambda (x) (make-real (/ (numer x) (denom x)))))
+(put 'raise '(real) (lambda (x) (make-complex-from-real-imag x 0)))
+(define (raise x) (apply-generic 'raise x))
+"""
+
+    def eval_2_84(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(self.common_raise)
+        self.load(fpath)
+        f = "(apply-generic 'add 1 (make-rational 4 2))"
+        r = self.eval_value(f, str)
+        if r != "(rational 3 . 1)":
+            return "%s is not the correct answer for %s" % (r, f)
+
+    common_equ = """
+(define (equ? x y) (apply-generic 'equ? x y))
+(put 'equ? '(scheme-number scheme-number) equal?)
+(put 'equ? '(rational rational)
+     (lambda (x y) (and (equ? (denom x) (denom y)) (equ? (numer x) (numer y)))))
+(put 'equ? '(complex complex)
+     (lambda (x y) (and (equ? (real-part x) (real-part y))
+                   (equ? (imag-part x) (imag-part y)))))
+"""
+
+    def eval_2_85(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(self.common_raise)
+        self.load(self.common_equ)
+        if os.path.exists(fpath.replace('85', '84')):
+            self.load(fpath.replace('85', '84'))
+        self.load(fpath)
+        f = "(apply-generic 'add 1 (make-rational 4 1))"
+        r = self.eval_value(f, int)
+        if r != 5:
+            return "%s is not the correct answer for %s" % (r, f)
+
+    def eval_2_86(self, fpath):
+        self.load(self.generic_operations_common)
+        self.load(self.common_raise)
+        self.load(self.common_equ)
+        if os.path.exists(fpath.replace('86', '84')):
+            self.load(fpath.replace('86', '84'))
+        if os.path.exists(fpath.replace('86', '85')):
+            self.load(fpath.replace('86', '85'))
+        self.load(fpath)
+        c = "(make-rational 4 1)"
+        f = "(apply-generic 'add 3 (make-complex-from-real-imag %s 2))" % c
+        r = self.eval_value(f, str)
+        if r != "(complex rectangular 7 . 2)":
+            return "%s is not the correct answer for %s" % (r, f)

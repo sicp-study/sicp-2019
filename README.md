@@ -152,11 +152,29 @@ To use the picture language, you can use DrRacket and load this [library](https:
 [lecture 4b (first half)](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4)
 
 
-### 2.5.1 & 2.5.2 (Generic Operations)
+### DONE 2.5.1 & 2.5.2 (Generic Operations)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-04-05 Fri&gt;</span></span></p>
 
 [lecture 4b (second half)](https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4)
+
+To run the code, use this put/get implementation:
+
+```scheme
+(define *op-table* (make-hash-table))
+
+(define (put op type proc)
+  (hash-table/put! *op-table* (list op type) proc))
+
+(define (get op type)
+  (hash-table/get *op-table* (list op type) '()))
+
+(define (put-coercion source-type target-type proc)
+  (put 'coercion (list source-type target-type) proc))
+
+(define (get-coercion source-type target-type)
+  (get 'coercion (list source-type target-type)))
+```
 
 
 ### 2.5.3 (Symbolic Algebra)

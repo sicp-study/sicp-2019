@@ -129,9 +129,27 @@ DEADLINE: <2019-03-22 Fri>
 DEADLINE: <2019-03-29 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4][lecture 4b (first half)]]
 
-*** 2.5.1 & 2.5.2 (Generic Operations)
+*** DONE 2.5.1 & 2.5.2 (Generic Operations)
 DEADLINE: <2019-04-05 Fri>
 [[https://archive.org/download/MIT_Structure_of_Computer_Programs_1986/lec4b.mp4][lecture 4b (second half)]]
+
+
+To run the code, use this put/get implementation:
+#+BEGIN_SRC scheme
+(define *op-table* (make-hash-table))
+
+(define (put op type proc)
+  (hash-table/put! *op-table* (list op type) proc))
+
+(define (get op type)
+  (hash-table/get *op-table* (list op type) '()))
+
+(define (put-coercion source-type target-type proc)
+  (put 'coercion (list source-type target-type) proc))
+
+(define (get-coercion source-type target-type)
+  (get 'coercion (list source-type target-type)))
+#+END_SRC
 
 *** 2.5.3 (Symbolic Algebra)
 DEADLINE: <2019-04-12 Fri>
