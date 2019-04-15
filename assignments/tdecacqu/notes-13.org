@@ -1,0 +1,362 @@
+#+TITLE: SICP 2.5 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Generic Operations
+*** Exercise 2.77
+Alyssa suggestion works because it attachs the missing operations to the upper complex type:
+#+BEGIN_SRC scheme
+(magnitude z)
+(apply-generic 'magnitude (contents z))
+((get 'magnitude '(complex)) (contents z))
+(apply-generic 'magnitude (contents (contents z)))
+((get 'magnitude '(rectangular) (contents (contents z))))
+#+END_SRC
+
+apply-generic is invoked twice. First the magnitude procedure of complex type is dispatched.
+Then the magnitude of the complex type implementation (in this example rectangular) is dispatched.
+
+*** Exercise 2.78
+Update our type-tag system to works with Scheme's internal type system:
+
+#+BEGIN_SRC scheme :tangle 2.78.scm
+(define (attach-tag type-tag contents)
+  (if (eq? type-tag 'scheme-number)
+      contents
+      (cons type-tag contents)))
+(define (type-tag datum)
+  (cond ((number? datum) 'scheme-number)
+        ((pair? datum) (car datum))
+        (else (error "Bad tagged datum: TYPE-TAG" datum))))
+(define (contents datum)
+  (cond ((number? datum) datum)
+        ((pair? datum) (cdr datum))
+        (else (error "Bad tagged datum: CONTENTS" datum))))
+#+END_SRC
+
+*** Exercise 2.79
+
+Define a predicate equ?
+
+#+BEGIN_SRC scheme :tangle 2.79.scm
+(define (equ? x y) (apply-generic 'equ? x y))
+(put 'equ? '(scheme-number scheme-number) equal?)
+(put 'equ? '(rational rational)
+     (lambda (x y) (and (equ? (denom x) (denom y)) (equ? (numer x) (numer y)))))
+(put 'equ? '(complex complex)
+     (lambda (x y) (and (equ? (real-part x) (real-part y))
+                   (equ? (imag-part x) (imag-part y)))))
+#+END_SRC
+
+*** Exercise 2.80
+
+Define a predicate =zero?
+#+BEGIN_SRC scheme :tangle 2.80.scm
+(define (=zero? x) (apply-generic '=zero? x))
+(put '=zero? '(scheme-number) zero?)
+(put '=zero? '(rational) (lambda (x) (=zero? (numer x))))
+(put '=zero? '(complex) (lambda (x) (and (=zero? (real-part x))
+                                    (=zero? (imag-part x)))))
+#+END_SRC
+
+*** Exercise 2.81
+
+1/ Louis's coercion procedures doesn't help because if there are no matchin
+operation procedure, then the apply-generic procedure will recurse infinitely.
+
+2/ Louis's code is incorrect.
+
+3/ Improved coercion procedure to avoid same type test
+
+#+BEGIN_SRC scheme
+  (define (apply-generic op . args)
+    (let ((type-tags (map type-tag args)))
+      (let ((proc (get op type-tags)))
+        (if proc
+            (apply proc (map contents args))
+            (if (= (length args) 2)
+                (let ((type1 (car type-tags))
+                      (type2 (cadr type-tags))
+                      (a1 (car args))
+                      (a2 (cadr args)))
+                  ;; Just added this test
+                  (if (equal? type1 type2)
+                    (error "No method for type" (list op type1))
+                    (let ((t1->t2
+                           (get-coercion type1
+                                         type2))
+                          (t2->t1
+                           (get-coercion type2
+                                         type1)))
+                      (cond (t1->t2
+                             (apply-generic
+                              op (t1->t2 a1) a2))
+                            (t2->t1
+                             (apply-generic
+                              op a1 (t2->t1 a2)))
+                            (else
+                             (error
+                              "No method for
+                               these types"
+                              (list
+                               op
+                               type-tags)))))))
+                (error
+                 "No method for these types"
+                 (list op type-tags)))))))
+#+END_SRC
+
+*** Exercise 2.82
+
+Improve apply-generic to handle multiple arguments coercion
+
+#+BEGIN_SRC scheme :tangle 2.82.scm
+  (define (apply-generic op . args)
+    (define (find-coerce-type type-tags)
+      "Return the type the other can coerce to, else nil"
+      (define (make-new-type-tags type len)
+        "Create a new op signature type tags"
+        (if (= len 0) '() (cons type (make-new-type-tags type (- len 1)))))
+      (define (coercable? type-tag)
+        (define (coercable-type? type-tags)
+          "Check if coercion from each type exists"
+          (cond ((null? type-tags) #t)
+                ((or (equal? (car type-tags) type-tag)
+                     (get-coercion (car type-tags) type-tag))
+                 (coercable-type? (cdr type-tags)))
+                (else #f)))
+        ;; first check if op exists for proposed types
+        (if (not (get op (make-new-type-tags type-tag (length type-tags))))
+            #f
+            (coercable-type? type-tags)))
+      (define (iter cur)
+        "Cdr down the list to find the first type that satisfy the other"
+        (cond ((null? cur) '())
+              ((coercable? (car cur))
+               (make-new-type-tags (car cur) (length type-tags)))
+              (else (iter (cdr cur)))))
+      (iter type-tags))
+    (let ((type-tags (map type-tag args)))
+      (let ((proc (get op type-tags)))
+        (if proc
+            (apply proc (map contents args))
+            (let ((dest-type-tags (find-coerce-type type-tags)))
+               (if (null? dest-type-tags)
+                   (error "No common type for" (list op type-args))
+                   (apply
+                     (get op dest-type-tags)
+                     (map
+                       (lambda (arg)
+                         (let ((arg-type (type-tag arg)))
+                           (if (equal? arg-type (car dest-type-tags))
+                             arg
+                             ((get-coercion arg-type (car dest-type-tags))
+                              arg))))
+                        args))))))))
+#+END_SRC
+
+*** Exercise 2.83
+
+Implement a raise procedure:
+
+#+BEGIN_SRC scheme :tangle 2.83.scm
+(put 'raise '(scheme-number) (lambda (x) (make-rational x 1)))
+(put 'raise '(rational) (lambda (x) (make-real (/ (numer x) (denom x)))))
+(put 'raise '(real) (lambda (x) (make-complex-from-real-imag x 0)))
+(define (raise x) (apply-generic 'raise x))
+#+END_SRC
+
+*** Exercise 2.84
+
+Update the apply-generic procedure to coerce type using raise:
+
+#+BEGIN_SRC scheme :tangle 2.84.scm
+  (define (type-towers type-name)
+    "Return the position of type-name in the tower"
+    (cond ((equal? type-name 'scheme-number) 1)
+          ((equal? type-name 'rational) 2)
+          ((equal? type-name 'real) 3)
+          ((equal? type-name 'complex) 4)
+          ((equal? type-name 'rectangular) 4)
+          (else (error "Unknown type" type-name))))
+  (define (get-highest-type args)
+    "Return the name of the highest type"
+    (define (iter args highest)
+      "Highest is a cons (level . name)"
+      (if (null? args)
+          (cdr highest)
+          (let ((type-name (type-tag (car args))))
+            (let ((type-level (type-towers type-name)))
+              (iter (cdr args)
+                (if (> (car highest) type-level)
+                    highest
+                    (cons type-level type-name)))))))
+    (iter args (cons 0 'void)))
+  (define (raise-args type-name args)
+    "Raise the args to type-name"
+    (define (raise-arg arg)
+      "Raise an arg until it reach type-name"
+      (if (equal? (type-tag arg) type-name)
+          arg
+          (raise-arg (raise arg))))
+    (cond ((null? args) '())
+          ((equal? (type-tag (car args)) type-name)
+           (cons (car args) (raise-args type-name (cdr args))))
+          (else (cons (raise-arg (car args))
+                      (raise-args type-name (cdr args))))))
+  (define (make-new-type-tags type len)
+    "Create a new op signature type tags"
+    (if (= len 0) '() (cons type (make-new-type-tags type (- len 1)))))
+  (define (apply-generic op . args)
+    (let ((target-type (get-highest-type args)))
+      (let ((proc (get op (make-new-type-tags target-type (length args)))))
+        (apply proc (map contents (raise-args target-type args))))))
+#+END_SRC
+
+*** Exercise 2.85
+
+Implement a drop procedure:
+
+#+BEGIN_SRC scheme :tangle 2.85.scm
+(put 'drop '(scheme-number) (lambda (x) x))
+(put 'drop '(rational) (lambda (x) (numer x)))
+(put 'drop '(real) (lambda (x) (make-rational (round x) 1)))
+(put 'drop '(complex) (lambda (x) (real-part x)))
+(define (drop x) (apply-generic 'drop x))
+
+(define (push x)
+  (if (equal? (type-tag x) 'scheme-number)
+    x
+    (let ((lower (drop x)))
+      (if (equ? (raise lower) x)
+          (push lower)
+          x))))
+#+END_SRC
+
+And update the apply-generic procedure to simplify the answer:
+
+#+BEGIN_SRC scheme :tangle 2.85.scm
+  (define (simplifiable? op)
+    (memq op '(add sub mul div)))
+  (define (apply-generic op . args)
+    (let ((target-type (get-highest-type args)))
+      (let ((proc (get op (make-new-type-tags target-type (length args)))))
+        (let ((res (apply proc (map contents (raise-args target-type args)))))
+          (if (simplifiable? op) (push res) res)))))
+#+END_SRC
+
+*** Exercise 2.86
+
+To support generic type for complex numbers component we need to use the new generic
+arithmetic system within the complex number package:
+
+#+BEGIN_SRC scheme :tangle 2.86.scm
+(define (install-rectangular-package)
+  ;; internal procedures
+  (define (real-part z) (car z))
+  (define (imag-part z) (cdr z))
+  (define (make-from-real-imag x y)
+    (cons x y))
+  (define (magnitude z)
+    (gsqrt (add (gsquare (real-part z))
+                (gsquare (imag-part z)))))
+  (define (angle z)
+    (gatan (imag-part z) (real-part z)))
+  (define (make-from-mag-ang r a)
+    (cons (mul r (gcos a)) (mul r (gsin a))))
+  ;; interface to the rest of the system
+  (define (tag x)
+    (attach-tag 'rectangular x))
+  (put 'real-part '(rectangular) real-part)
+  (put 'imag-part '(rectangular) imag-part)
+  (put 'magnitude '(rectangular) magnitude)
+  (put 'angle '(rectangular) angle)
+  (put 'make-from-real-imag 'rectangular
+       (lambda (x y)
+         (tag (make-from-real-imag x y))))
+  (put 'make-from-mag-ang 'rectangular
+       (lambda (r a)
+         (tag (make-from-mag-ang r a))))
+  'done)
+(install-rectangular-package)
+
+(define (install-complex-package)
+  ;; imported procedures from rectangular
+  ;; and polar packages
+  (define (make-from-real-imag x y)
+    ((get 'make-from-real-imag
+          'rectangular)
+     x y))
+  (define (make-from-mag-ang r a)
+    ((get 'make-from-mag-ang 'polar)
+     r a))
+  ;; internal procedures
+  (define (add-complex z1 z2)
+    (make-from-real-imag
+     (add (real-part z1) (real-part z2))
+     (add (imag-part z1) (imag-part z2))))
+  (define (sub-complex z1 z2)
+    (make-from-real-imag
+     (sub (real-part z1) (real-part z2))
+     (sub (imag-part z1) (imag-part z2))))
+  (define (mul-complex z1 z2)
+    (make-from-mag-ang
+     (mul (magnitude z1) (magnitude z2))
+     (add (angle z1) (angle z2))))
+  (define (div-complex z1 z2)
+    (make-from-mag-ang
+     (div (magnitude z1) (magnitude z2))
+     (sub (angle z1) (angle z2))))
+  ;; interface to rest of the system
+  (define (tag z) (attach-tag 'complex z))
+  (put 'add '(complex complex)
+       (lambda (z1 z2)
+         (tag (add-complex z1 z2))))
+  (put 'sub '(complex complex)
+       (lambda (z1 z2)
+         (tag (sub-complex z1 z2))))
+  (put 'mul '(complex complex)
+       (lambda (z1 z2)
+         (tag (mul-complex z1 z2))))
+  (put 'div '(complex complex)
+       (lambda (z1 z2)
+         (tag (div-complex z1 z2))))
+  (put 'make-from-real-imag 'complex
+       (lambda (x y)
+         (tag (make-from-real-imag x y))))
+  (put 'make-from-mag-ang 'complex
+       (lambda (r a)
+         (tag (make-from-mag-ang r a))))
+  (define (real-part z)
+    (apply-generic 'real-part z))
+  (define (imag-part z)
+    (apply-generic 'imag-part z))
+  (define (magnitude z)
+    (apply-generic 'magnitude z))
+  (define (angle z)
+    (apply-generic 'angle z))
+  (put 'real-part '(complex) real-part)
+  (put 'imag-part '(complex) imag-part)
+  (put 'magnitude '(complex) magnitude)
+  (put 'angle '(complex) angle)
+  'done)
+(install-complex-package)
+
+;; Implement missing procedure
+(define (gsin x) (apply-generic 'sin x))
+(define (gcos x) (apply-generic 'cos x))
+(define (gatan x) (apply-generic 'atan x))
+(define (gsqrt x) (apply-generic 'sqrt x))
+(define (gsquare x) (apply-generic 'square x))
+
+(put 'sin '(scheme-number) sin)
+(put 'cos '(scheme-number) cos)
+(put 'atan '(scheme-number) atan)
+(put 'sqrt '(scheme-number) sqrt)
+(put 'square '(scheme-number) square)
+(put 'sin '(rational) (lambda (x) (sin (/ (numer x) (denom x)))))
+(put 'cos '(rational) (lambda (x) (cos (/ (numer x) (denom x)))))
+;; ...
+#+END_SRC
