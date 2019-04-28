@@ -177,7 +177,7 @@ To run the code, use this put/get implementation:
 ```
 
 
-### 2.5.3 (Symbolic Algebra)
+### DONE 2.5.3 (Symbolic Algebra)
 
 <p><span class="timestamp-wrapper"><span class="timestamp-kwd">DEADLINE:</span> <span class="timestamp">&lt;2019-04-12 Fri&gt;</span></span></p>
 
