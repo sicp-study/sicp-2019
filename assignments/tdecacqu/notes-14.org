@@ -1,0 +1,129 @@
+#+TITLE: SICP 2.5.3 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Symbolic Algebra
+*** Exercise 2.87
+Install =zero? for polynomials in the generic arithmetic package:
+
+#+BEGIN_SRC scheme :tangle 2.87.scm
+(put '=zero? '(polynomial) (lambda (x) (empty-termlist? (term-list x))))
+#+END_SRC
+
+*** Exercise 2.88
+
+Add substraction to the polynomial system (without negate):
+#+BEGIN_SRC scheme :tangle 2.88.scm
+(define (sub-terms L1 L2)
+  (cond ((empty-termlist? L1) L2)
+        ((empty-termlist? L2) L1)
+        (else
+         (let ((t1 (first-term L1)) (t2 (first-term L2)))
+           (cond ((> (order t1) (order t2))
+                  (adjoin-term
+                   t1
+                   (add-terms (rest-terms L1) L2)))
+                 ((< (order t1) (order t2))
+                  (adjoin-term
+                   t2
+                   (add-terms L1 (rest-terms L2))))
+                 (else
+                  (adjoin-term
+                   (make-term
+                    (order t1)
+                    (sub (coeff t1) (coeff t2)))
+                   (add-terms (rest-terms L1) (rest-terms L2)))))))))
+(put 'sub '(polynomial polynomial)
+     (lambda (p1 p2)
+        (if (same-variable? (variable p1) (variable p2))
+            (attach-tag 'polynomial (make-poly
+              (variable p1)
+              (sub-terms (term-list p1) (term-list p2))))
+            (error "Polys not in same var: SUB-POLY" (list p1 p2)))))
+#+END_SRC
+
+*** Exercise 2.89
+
+Implement term-list for dense polynomials:
+#+BEGIN_SRC scheme :tangle 2.89.scm
+;; Update first-term to return a compatible list of order and coef
+(define (first-term term-list)
+  (make-term (length term-list) (car term-list)))
+;; Update adjoin-term to pack the term in the list of coef
+(define (adjoin-term term term-list)
+  (cond ((=zero? (coeff term)) term-list)
+        ((equ? (order term) (length term-list)) (cons (coeff term) term-list))
+        (else (adjoin-term term (cons 0 term-list)))))
+#+END_SRC
+
+According to the exercise 2.90, this implementation does not support sparse
+polynomials.
+
+*** Exercise 2.90
+
+Redesign the polynomial system to support both implementations:
+#+BEGIN_SRC scheme :tangle 2.90.scm
+(define (adjoin-term term term-list)
+  (cond ((=zero? (coeff term)) term-list)
+        ;; Assume this is a sparse poly, thus just prepend the term
+        ((or (empty-termlist? term-list)
+             (pair? (car term-list)))
+         (cons term term-list))
+        ((equ? (order term) (length term-list)) (cons (coeff term) term-list))
+        (else (adjoin-term term (cons 0 term-list)))))
+(define (first-term term-list)
+  (if (pair? (car term-list))
+      (car term-list)
+      (make-term (length term-list) (car term-list))))
+#+END_SRC
+
+While this implementation coerce dense polynomial to their sparse version,
+it enable operation between both definition. To properly answer the author
+question, we would have to define a sparse-poly and dense-poly packages
+as we did for complex number by using the answer from the exercise 2.89.
+
+*** Exercise 2.91
+
+Implement div-poly:
+#+BEGIN_SRC scheme :tangle 2.91.scm
+  (define (div-terms L1 L2)
+    (if (empty-termlist? L1)
+        (list (the-empty-termlist) (the-empty-termlist))
+        (let ((t1 (first-term L1)) (t2 (first-term L2)))
+          (if (> (order t2) (order t1))
+              (list (the-empty-termlist) L1)
+              (let ((new-c (div (coeff t1) (coeff t2)))
+                    (new-o (- (order t1) (order t2))))
+                (let ((rest-of-result
+                       (div-terms (sub-terms
+                                   L1
+                                   (mul-term-by-all-terms
+                                     (make-term new-o new-c)
+                                     L2))
+                                  L2)))
+                  (list (adjoin-term
+                          (make-term new-o new-c)
+                          (car rest-of-result))
+                        (cadr rest-of-result))))))))
+  (define (div-poly P1 P2)
+     (if (same-variable? (variable p1) (variable p2))
+         (let ((result (div-terms (term-list p1) (term-list p2))))
+           (list (make-poly (variable p1) (car result))
+                 (make-poly (variable p1) (cadr result))))
+         (error "Variable is not the same -- DIV-POLY"
+                (list (variable p1) (variable p2)))))
+
+  (put 'div '(polynomial polynomial)
+    (lambda (p1 p2)
+      (let ((res (div-poly p1 p2)))
+        (list
+          (attach-tag 'polynomial (car res))
+          (attach-tag 'polynomial (cadr res))))))
+#+END_SRC
+
+*** Exercise 2.92
+
+I am skipping this exercise because the authors say it's not an easy one and
+I'm not interested by polynomial arithmetic :)
