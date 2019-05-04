@@ -1,0 +1,105 @@
+#+TITLE: SICP 2.4 assignment
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Building Abstractions with Data
+** Data Representation
+*** Exercise 2.73
+1/ The deriv procedure has been refactored to use the apply-operator technique.
+It couldn't be used for number? and variable? because those are primitive type
+and there is no operation to dispatch.
+
+2/ The procedures for sums and products are:
+
+#+BEGIN_SRC scheme
+  (define (deriv-sum exp var)
+    (make-sum (deriv (addend exp) var) (deriv (augend exp) var)))
+  (put 'deriv '+ deriv-sum)
+
+  (define (deriv-product exp var)
+    (make-sum
+     (make-product
+      (multiplier exp)
+      (deriv (multiplicand exp) var))
+     (make-product
+      (deriv (multiplier exp) var)
+      (multiplicand exp))))
+  (put 'deriv '* deriv-product)
+#+END_SRC
+
+3/ Exponentiation can be installed like so:
+
+#+BEGIN_SRC scheme
+  (put 'deriv '**
+       (lambda (exp var)
+         (make-product
+          (make-product (exponent exp)
+                        (make-exponentiation (base exp)
+                                             (make-sum (exponent exp) -1)))
+          (deriv (base exp) var))))
+#+END_SRC
+
+4/ If the procedure index is changed, only the order of the put arguments needs to be updated.
+
+*** Exercise 2.74
+
+1/ Each divisions could use a type tag for their file and the get-record would look like this:
+
+#+BEGIN_SRC scheme
+(define (get-record name file)
+  (let (proc (get 'get-record (type-tag file)))
+    (if proc
+      (proc name)
+      (error "Missing file type"))))
+#+END_SRC
+
+2/ The record would also need a type tag and the get-salary procedure would look like this:
+
+#+BEGIN_SRC scheme
+(define (get-salary record)
+  (let (proc (get 'get-salary (type-tag record)))
+    (if proc
+      (proc (contents record))
+      (error "Missing record type"))))
+#+END_SRC
+
+3/ The find-employee-record
+
+#+BEGIN_SRC scheme
+(define (find-employee-record name files)
+  (if (null? files)
+      nil
+      (let (record (get-record name (car files)))
+        (if record
+            record
+            (find-employee-record name (cdr files))))))
+#+END_SRC
+
+4/ When a new company is acquired, new file and record type needs to be installed.
+
+*** Exercise 2.75
+
+Implement the constructor make-from-mag-ang in message-passing style.
+
+#+BEGIN_SRC scheme
+(define (make-from-mag-ang mag ang)
+  (define (dispatch op)
+    (cond ((eq? op 'real-part) (* mag (cos ang)))
+          ((eq? op 'imag-part) (* mag (sin ang)))
+          ((eq? op 'magnitude) mag)
+          ((eq? op 'angle) ang)
+          (else (error "Unknown op: " op))))
+  dispatch)
+#+END_SRC
+
+*** Exercise 2.76
+
+To add a new type or operations:
+
+- Explicit dispatch procedures need to be updated to include new type.
+- Data-directed install-method need to be updated.
+- Message-passing style constructor need to be updated.
+
+Data-directed or message-passing are the most appropriate because
+the change are local to the affected procedures.
